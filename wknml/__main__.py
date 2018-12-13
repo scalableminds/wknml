@@ -1,30 +1,85 @@
 import xml.etree.ElementTree as ET
-from collections import namedtuple
+from typing import NamedTuple, List, Tuple
 
-NML = namedtuple("NML", ["parameters", "trees", "branchpoints", "comments", "groups"])
-NMLParameters = namedtuple(
-    "NMLParameters",
-    ["name", "scale", "offset", "time", "editPosition", "editRotation", "zoomLevel"],
+Vector3 = Tuple[float, float, float]
+Vector4 = Tuple[float, float, float, float]
+
+NMLParameters = NamedTuple(
+  "NMLParameters",
+  [
+    ("name", str),
+    ("scale", Vector3),
+    ("offset", Vector3),
+    ("time", int),
+    ("editPosition", Vector3),
+    ("editRotation", Vector3),
+    ("zoomLevel", float),
+  ],
 )
-Tree = namedtuple("Tree", ["id", "color", "name", "groupId", "nodes", "edges"])
-Node = namedtuple(
-    "Node",
-    [
-        "id",
-        "radius",
-        "position",
-        "rotation",
-        "inVp",
-        "inMag",
-        "bitDepth",
-        "interpolation",
-        "time",
-    ],
+Node = NamedTuple(
+  "Node",
+  [
+    ("id", int),
+    ("radius", float),
+    ("position", Vector3),
+    ("rotation", Vector3),
+    ("inVp", int),
+    ("inMag", int),
+    ("bitDepth", int),
+    ("interpolation", bool),
+    ("time", int),
+  ],
 )
-Edge = namedtuple("Edge", ["source", "target"])
-Branchpoint = namedtuple("Branchpoint", ["id", "time"])
-Group = namedtuple("Group", ["id", "name"])
-Comment = namedtuple("Comment", ["node", "content"])
+Edge = NamedTuple(
+  "Edge",
+  [
+    ("source", int),
+    ("target", int),
+  ],
+)
+Tree = NamedTuple(
+  "Tree",
+  [
+    ("id", int),
+    ("color", Vector4),
+    ("name", str),
+    ("groupId", int),
+    ("nodes", List[Node]),
+    ("edges", List[Edge]),
+  ],
+)
+Branchpoint = NamedTuple(
+  "Branchpoint",
+  [
+    ("id", int),
+    ("time", int),
+  ],
+)
+Group = NamedTuple(
+  "Group",
+  [
+    ("id", int),
+    ("name", str),
+  ],
+)
+Comment = NamedTuple(
+  "Comment",
+  [
+    ("node", int),
+    ("content", str),
+  ],
+)
+
+NML = NamedTuple(
+  "NML",
+  [
+    ("parameters", NMLParameters),
+    ("trees", List[Tree]),
+    ("branchpoints", List[Branchpoint]),
+    ("comments", List[Comment]),
+    ("groups", List[Group]),
+  ],
+)
 
 
 def parse_parameters(nml_parameters):
@@ -127,7 +182,7 @@ def parse_tree(nml_tree):
 
 
 def parse_branchpoint(nml_branchpoint):
-    return Branchpoint(int(nml_branchpoint.get("id")), int(nml_branchpoint.get("time")))
+    return Branchpoint(int(nml_branchpoint.get("id")), int(nml_branchpoint.get("time", 0)))
 
 
 def parse_comment(nml_comment):
