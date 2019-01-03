@@ -99,6 +99,18 @@ def parse_parameters(nml_parameters):
             float(nml_parameters.find("editRotation").get("zRot")),
         )
 
+    editPosition = (0, 0, 0)
+    if nml_parameters.find("editPosition") is not None:
+      editPosition = (
+        float(nml_parameters.find("editPosition").get("x")),
+        float(nml_parameters.find("editPosition").get("y")),
+        float(nml_parameters.find("editPosition").get("z")),
+      )
+
+    time = 0
+    if nml_parameters.find("time") is not None:
+      time = int(nml_parameters.find("time").get("ms"))
+
     zoomLevel = 0
     if nml_parameters.find("zoomLevel") is not None:
         zoomLevel = nml_parameters.find("zoomLevel").get("zoom")
@@ -111,12 +123,8 @@ def parse_parameters(nml_parameters):
             float(nml_parameters.find("scale").get("z")),
         ),
         offset=offset,
-        time=int(nml_parameters.find("time").get("ms")),
-        editPosition=(
-            float(nml_parameters.find("editPosition").get("x")),
-            float(nml_parameters.find("editPosition").get("y")),
-            float(nml_parameters.find("editPosition").get("z")),
-        ),
+        time=time,
+        editPosition=editPosition,
         editRotation=editRotation,
         zoomLevel=zoomLevel,
     )
@@ -194,14 +202,24 @@ def parse_group(nml_group):
 
 
 def parse_nml(nml_root):
+
     groups = [Group(id=1, name="")]
     if nml_root.find("groups") is not None:
-        groups = [parse_group(g) for g in nml_root.find("groups")]
+      groups = [parse_group(g) for g in nml_root.find("groups")]
+
+    branchpoints = []
+    if nml_root.find("branchpoints") is not None:
+      branchpoints = [parse_branchpoint(b) for b in nml_root.find("branchpoints")]
+
+    comments = []
+    if nml_root.find("comments") is not None:
+      comments = [parse_comment(c) for c in nml_root.find("comments")]
+
     return NML(
         parameters=parse_parameters(nml_root.find("parameters")),
         trees=[parse_tree(t) for t in nml_root.iter("thing")],
-        branchpoints=[parse_branchpoint(b) for b in nml_root.find("branchpoints")],
-        comments=[parse_comment(c) for c in nml_root.find("comments")],
+        branchpoints=branchpoints,
+        comments=comments,
         groups=groups,
     )
 
