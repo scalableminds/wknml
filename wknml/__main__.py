@@ -1,5 +1,5 @@
 import xml.etree.ElementTree as ET
-from typing import NamedTuple, List, Tuple
+from typing import NamedTuple, List, Tuple, Optional
 
 Vector3 = Tuple[float, float, float]
 Vector4 = Tuple[float, float, float, float]
@@ -22,12 +22,12 @@ Node = NamedTuple(
     ("id", int),
     ("radius", float),
     ("position", Vector3),
-    ("rotation", Vector3),
-    ("inVp", int),
-    ("inMag", int),
-    ("bitDepth", int),
-    ("interpolation", bool),
-    ("time", int),
+    ("rotation", Optional[Vector3]),
+    ("inVp", Optional[int]),
+    ("inMag", Optional[int]),
+    ("bitDepth", Optional[int]),
+    ("interpolation", Optional[bool]),
+    ("time", Optional[int]),
   ],
 )
 Edge = NamedTuple(
@@ -260,24 +260,38 @@ def dump_parameters(parameters):
 
 
 def dump_node(node):
-    return ET.Element(
-        "node",
-        {
-            "id": str(node.id),
-            "radius": str(node.radius),
-            "x": str(node.position[0]),
-            "y": str(node.position[1]),
-            "z": str(node.position[2]),
+
+    attributes = {
+        "id": str(node.id),
+        "radius": str(node.radius),
+        "x": str(node.position[0]),
+        "y": str(node.position[1]),
+        "z": str(node.position[2]),
+    }
+
+    if node.rotation is not None:
+        attributes += {
             "rotX": str(node.rotation[0]),
             "rotY": str(node.rotation[1]),
             "rotZ": str(node.rotation[2]),
-            "inVp": str(node.inVp),
-            "inMag": str(node.inMag),
-            "bitDepth": str(node.bitDepth),
-            "interpolation": str(node.interpolation),
-            "time": str(node.time),
-        },
-    )
+        }
+
+    if node.inVp is not None:
+        attributes["inVp"] += str(node.inVp)
+
+    if node.inMag is not None:
+        attributes["inMag"] += str(node.inMag)
+
+    if node.bitDepth is not None:
+        attributes["bitDepth"] += str(node.bitDepth)
+
+    if node.interpolation is not None:
+        attributes["interpolation"] += str(node.interpolation)
+
+    if node.time is not None:
+        attributes["time"] += str(node.time)
+
+    return ET.Element("node", attributes)
 
 
 def dump_edge(edge):
@@ -322,22 +336,23 @@ def dump_group(group):
     return ET.Element("group", {"id": str(group.id), "name": group.name})
 
 
-def dump_nml(file):
+def dump_nml(nml: NML):
+
     nml_root = ET.Element("things")
-    nml_root.append(dump_parameters(file.parameters))
-    for t in file.trees:
+    nml_root.append(dump_parameters(nml.parameters))
+    for t in nml.trees:
         nml_root.append(dump_tree(t))
 
     nml_branchpoints = ET.SubElement(nml_root, "branchpoints")
-    for b in file.branchpoints:
+    for b in nml.branchpoints:
         nml_branchpoints.append(dump_branchpoint(b))
 
     nml_comments = ET.SubElement(nml_root, "comments")
-    for c in file.comments:
+    for c in nml.comments:
         nml_comments.append(dump_comment(c))
 
     nml_groups = ET.SubElement(nml_root, "groups")
-    for g in file.groups:
+    for g in nml.groups:
         nml_groups.append(dump_group(g))
 
     return nml_root
