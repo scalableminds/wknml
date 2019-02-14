@@ -312,7 +312,7 @@ def dump_tree(tree):
     nml_nodes = ET.SubElement(nml_tree, "nodes")
     for n in tree.nodes:
         nml_nodes.append(dump_node(n))
-    nml_edges = ET.SubElement(nml_tree, "egdes")
+    nml_edges = ET.SubElement(nml_tree, "edges")
     for e in tree.edges:
         nml_edges.append(dump_edge(e))
     return nml_tree
