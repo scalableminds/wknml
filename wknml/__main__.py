@@ -270,26 +270,24 @@ def dump_node(node):
     }
 
     if node.rotation is not None:
-        attributes += {
-            "rotX": str(node.rotation[0]),
-            "rotY": str(node.rotation[1]),
-            "rotZ": str(node.rotation[2]),
-        }
+        attributes["rotX"] = str(node.rotation[0])
+        attributes["rotY"] = str(node.rotation[1])
+        attributes["rotZ"] = str(node.rotation[2])
 
     if node.inVp is not None:
-        attributes["inVp"] += str(node.inVp)
+        attributes["inVp"] = str(node.inVp)
 
     if node.inMag is not None:
-        attributes["inMag"] += str(node.inMag)
+        attributes["inMag"] = str(node.inMag)
 
     if node.bitDepth is not None:
-        attributes["bitDepth"] += str(node.bitDepth)
+        attributes["bitDepth"] = str(node.bitDepth)
 
     if node.interpolation is not None:
-        attributes["interpolation"] += str(node.interpolation)
+        attributes["interpolation"] = str(node.interpolation)
 
     if node.time is not None:
-        attributes["time"] += str(node.time)
+        attributes["time"] = str(node.time)
 
     return ET.Element("node", attributes)
 
