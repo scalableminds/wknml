@@ -43,7 +43,7 @@ Tree = NamedTuple(
     ("id", int),
     ("color", Vector4),
     ("name", str),
-    ("groupId", int),
+    ("groupId", Optional[int]),
     ("nodes", List[Node]),
     ("edges", List[Edge]),
   ],
@@ -297,18 +297,20 @@ def dump_edge(edge):
 
 
 def dump_tree(tree):
-    nml_tree = ET.Element(
-        "thing",
-        {
-            "id": str(tree.id),
-            "groupId": str(tree.groupId),
-            "color.r": str(tree.color[0]),
-            "color.g": str(tree.color[1]),
-            "color.b": str(tree.color[2]),
-            "color.a": str(tree.color[3]),
-            "name": tree.name,
-        },
-    )
+    
+    attributes = {
+        "id": str(tree.id),
+        "color.r": str(tree.color[0]),
+        "color.g": str(tree.color[1]),
+        "color.b": str(tree.color[2]),
+        "color.a": str(tree.color[3]),
+        "name": tree.name,
+    }
+    
+    if tree.groupId is not None:
+        attributes["groupId"] = str(tree.groupId)
+    
+    nml_tree = ET.Element("thing", attributes)
     nml_nodes = ET.SubElement(nml_tree, "nodes")
     for n in tree.nodes:
         nml_nodes.append(dump_node(n))
