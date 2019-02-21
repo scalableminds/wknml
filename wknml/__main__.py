@@ -1,30 +1,85 @@
 import xml.etree.ElementTree as ET
-from collections import namedtuple
+from typing import NamedTuple, List, Tuple, Optional
 
-NML = namedtuple("NML", ["parameters", "trees", "branchpoints", "comments", "groups"])
-NMLParameters = namedtuple(
-    "NMLParameters",
-    ["name", "scale", "offset", "time", "editPosition", "editRotation", "zoomLevel"],
+Vector3 = Tuple[float, float, float]
+Vector4 = Tuple[float, float, float, float]
+
+NMLParameters = NamedTuple(
+  "NMLParameters",
+  [
+    ("name", str),
+    ("scale", Vector3),
+    ("offset", Vector3),
+    ("time", int),
+    ("editPosition", Vector3),
+    ("editRotation", Vector3),
+    ("zoomLevel", float),
+  ],
 )
-Tree = namedtuple("Tree", ["id", "color", "name", "groupId", "nodes", "edges"])
-Node = namedtuple(
-    "Node",
-    [
-        "id",
-        "radius",
-        "position",
-        "rotation",
-        "inVp",
-        "inMag",
-        "bitDepth",
-        "interpolation",
-        "time",
-    ],
+Node = NamedTuple(
+  "Node",
+  [
+    ("id", int),
+    ("radius", float),
+    ("position", Vector3),
+    ("rotation", Optional[Vector3]),
+    ("inVp", Optional[int]),
+    ("inMag", Optional[int]),
+    ("bitDepth", Optional[int]),
+    ("interpolation", Optional[bool]),
+    ("time", Optional[int]),
+  ],
 )
-Edge = namedtuple("Edge", ["source", "target"])
-Branchpoint = namedtuple("Branchpoint", ["id", "time"])
-Group = namedtuple("Group", ["id", "name"])
-Comment = namedtuple("Comment", ["node", "content"])
+Edge = NamedTuple(
+  "Edge",
+  [
+    ("source", int),
+    ("target", int),
+  ],
+)
+Tree = NamedTuple(
+  "Tree",
+  [
+    ("id", int),
+    ("color", Vector4),
+    ("name", str),
+    ("groupId", int),
+    ("nodes", List[Node]),
+    ("edges", List[Edge]),
+  ],
+)
+Branchpoint = NamedTuple(
+  "Branchpoint",
+  [
+    ("id", int),
+    ("time", int),
+  ],
+)
+Group = NamedTuple(
+  "Group",
+  [
+    ("id", int),
+    ("name", str),
+  ],
+)
+Comment = NamedTuple(
+  "Comment",
+  [
+    ("node", int),
+    ("content", str),
+  ],
+)
+
+NML = NamedTuple(
+  "NML",
+  [
+    ("parameters", NMLParameters),
+    ("trees", List[Tree]),
+    ("branchpoints", List[Branchpoint]),
+    ("comments", List[Comment]),
+    ("groups", List[Group]),
+  ],
+)
 
 
 def parse_parameters(nml_parameters):
@@ -44,6 +99,18 @@ def parse_parameters(nml_parameters):
             float(nml_parameters.find("editRotation").get("zRot")),
         )
 
+    editPosition = (0, 0, 0)
+    if nml_parameters.find("editPosition") is not None:
+      editPosition = (
+        float(nml_parameters.find("editPosition").get("x")),
+        float(nml_parameters.find("editPosition").get("y")),
+        float(nml_parameters.find("editPosition").get("z")),
+      )
+
+    time = 0
+    if nml_parameters.find("time") is not None:
+      time = int(nml_parameters.find("time").get("ms"))
+
     zoomLevel = 0
     if nml_parameters.find("zoomLevel") is not None:
         zoomLevel = nml_parameters.find("zoomLevel").get("zoom")
@@ -56,12 +123,8 @@ def parse_parameters(nml_parameters):
             float(nml_parameters.find("scale").get("z")),
         ),
         offset=offset,
-        time=int(nml_parameters.find("time").get("ms")),
-        editPosition=(
-            float(nml_parameters.find("editPosition").get("x")),
-            float(nml_parameters.find("editPosition").get("y")),
-            float(nml_parameters.find("editPosition").get("z")),
-        ),
+        time=time,
+        editPosition=editPosition,
         editRotation=editRotation,
         zoomLevel=zoomLevel,
     )
@@ -127,7 +190,7 @@ def parse_tree(nml_tree):
 
 
 def parse_branchpoint(nml_branchpoint):
-    return Branchpoint(int(nml_branchpoint.get("id")), int(nml_branchpoint.get("time")))
+    return Branchpoint(int(nml_branchpoint.get("id")), int(nml_branchpoint.get("time", 0)))
 
 
 def parse_comment(nml_comment):
@@ -139,14 +202,24 @@ def parse_group(nml_group):
 
 
 def parse_nml(nml_root):
+
     groups = [Group(id=1, name="")]
     if nml_root.find("groups") is not None:
-        groups = [parse_group(g) for g in nml_root.find("groups")]
+      groups = [parse_group(g) for g in nml_root.find("groups")]
+
+    branchpoints = []
+    if nml_root.find("branchpoints") is not None:
+      branchpoints = [parse_branchpoint(b) for b in nml_root.find("branchpoints")]
+
+    comments = []
+    if nml_root.find("comments") is not None:
+      comments = [parse_comment(c) for c in nml_root.find("comments")]
+
     return NML(
         parameters=parse_parameters(nml_root.find("parameters")),
         trees=[parse_tree(t) for t in nml_root.iter("thing")],
-        branchpoints=[parse_branchpoint(b) for b in nml_root.find("branchpoints")],
-        comments=[parse_comment(c) for c in nml_root.find("comments")],
+        branchpoints=branchpoints,
+        comments=comments,
         groups=groups,
     )
 
@@ -187,24 +260,36 @@ def dump_parameters(parameters):
 
 
 def dump_node(node):
-    return ET.Element(
-        "node",
-        {
-            "id": str(node.id),
-            "radius": str(node.radius),
-            "x": str(node.position[0]),
-            "y": str(node.position[1]),
-            "z": str(node.position[2]),
-            "rotX": str(node.rotation[0]),
-            "rotY": str(node.rotation[1]),
-            "rotZ": str(node.rotation[2]),
-            "inVp": str(node.inVp),
-            "inMag": str(node.inMag),
-            "bitDepth": str(node.bitDepth),
-            "interpolation": str(node.interpolation),
-            "time": str(node.time),
-        },
-    )
+
+    attributes = {
+        "id": str(node.id),
+        "radius": str(node.radius),
+        "x": str(node.position[0]),
+        "y": str(node.position[1]),
+        "z": str(node.position[2]),
+    }
+
+    if node.rotation is not None:
+        attributes["rotX"] = str(node.rotation[0])
+        attributes["rotY"] = str(node.rotation[1])
+        attributes["rotZ"] = str(node.rotation[2])
+
+    if node.inVp is not None:
+        attributes["inVp"] = str(node.inVp)
+
+    if node.inMag is not None:
+        attributes["inMag"] = str(node.inMag)
+
+    if node.bitDepth is not None:
+        attributes["bitDepth"] = str(node.bitDepth)
+
+    if node.interpolation is not None:
+        attributes["interpolation"] = str(node.interpolation)
+
+    if node.time is not None:
+        attributes["time"] = str(node.time)
+
+    return ET.Element("node", attributes)
 
 
 def dump_edge(edge):
@@ -227,7 +312,7 @@ def dump_tree(tree):
     nml_nodes = ET.SubElement(nml_tree, "nodes")
     for n in tree.nodes:
         nml_nodes.append(dump_node(n))
-    nml_edges = ET.SubElement(nml_tree, "egdes")
+    nml_edges = ET.SubElement(nml_tree, "edges")
     for e in tree.edges:
         nml_edges.append(dump_edge(e))
     return nml_tree
@@ -249,22 +334,23 @@ def dump_group(group):
     return ET.Element("group", {"id": str(group.id), "name": group.name})
 
 
-def dump_nml(file):
+def dump_nml(nml: NML):
+
     nml_root = ET.Element("things")
-    nml_root.append(dump_parameters(file.parameters))
-    for t in file.trees:
+    nml_root.append(dump_parameters(nml.parameters))
+    for t in nml.trees:
         nml_root.append(dump_tree(t))
 
     nml_branchpoints = ET.SubElement(nml_root, "branchpoints")
-    for b in file.branchpoints:
+    for b in nml.branchpoints:
         nml_branchpoints.append(dump_branchpoint(b))
 
     nml_comments = ET.SubElement(nml_root, "comments")
-    for c in file.comments:
+    for c in nml.comments:
         nml_comments.append(dump_comment(c))
 
     nml_groups = ET.SubElement(nml_root, "groups")
-    for g in file.groups:
+    for g in nml.groups:
         nml_groups.append(dump_group(g))
 
     return nml_root
