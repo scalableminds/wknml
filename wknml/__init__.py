@@ -3,6 +3,7 @@ from typing import NamedTuple, List, Tuple, Optional
 
 Vector3 = Tuple[float, float, float]
 Vector4 = Tuple[float, float, float, float]
+IntVector6 = Tuple[int, int, int, int, int, int]
 
 NMLParameters = NamedTuple(
   "NMLParameters",
@@ -14,6 +15,7 @@ NMLParameters = NamedTuple(
     ("editPosition", Vector3),
     ("editRotation", Vector3),
     ("zoomLevel", float),
+    ("taskBoundingBox", Optional[IntVector6]),
   ],
 )
 Node = NamedTuple(
@@ -115,6 +117,17 @@ def parse_parameters(nml_parameters):
     if nml_parameters.find("zoomLevel") is not None:
         zoomLevel = nml_parameters.find("zoomLevel").get("zoom")
 
+    taskBoundingBox = None
+    if nml_parameters.find("taskBoundingBox") is not None:
+      taskBoundingBox = (
+        int(nml_parameters.find("taskBoundingBox").get("topLeftX")),
+        int(nml_parameters.find("taskBoundingBox").get("topLeftY")),
+        int(nml_parameters.find("taskBoundingBox").get("topLeftZ")),
+        int(nml_parameters.find("taskBoundingBox").get("width")),
+        int(nml_parameters.find("taskBoundingBox").get("height")),
+        int(nml_parameters.find("taskBoundingBox").get("depth")),
+      )
+
     return NMLParameters(
         name=nml_parameters.find("experiment").get("name"),
         scale=(
@@ -127,6 +140,7 @@ def parse_parameters(nml_parameters):
         editPosition=editPosition,
         editRotation=editRotation,
         zoomLevel=zoomLevel,
+        taskBoundingBox=taskBoundingBox
     )
 
 
@@ -256,6 +270,20 @@ def dump_parameters(parameters):
         },
     )
     ET.SubElement(nml_parameters, "zoomLevel", {"zoom": str(parameters.zoomLevel)})
+
+    if parameters.taskBoundingBox is not None:
+        ET.SubElement(
+            nml_parameters,
+            "taskBoundingBox",
+            {
+                "topLeftX": str(parameters.taskBoundingBox[0]),
+                "topLeftY": str(parameters.taskBoundingBox[1]),
+                "topLeftZ": str(parameters.taskBoundingBox[2]),
+                "width": str(parameters.taskBoundingBox[3]),
+                "height": str(parameters.taskBoundingBox[4]),
+                "depth": str(parameters.taskBoundingBox[5]),
+            },
+        )
     return nml_parameters
 
 
