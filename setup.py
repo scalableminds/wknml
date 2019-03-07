@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 setup(
     name="wknml",
     packages=find_packages(exclude=("tests",)),
-    version="0.0.3",
+    version="0.0.4",
     description="An NML library webKnossos",
     author="Norman Rzepka",
     author_email="norman.rzepka@scalableminds.com",
