@@ -15,6 +15,6 @@ pip install wknml
 ## Snippets
 ```
 # Convert an NML file with unlinked nodes to one with connected trees
-python -m examples.fix_unlinked_nodes <unlinked>.nml <fixed>.nml
+python -m examples.fix_unlinked_nml <unlinked>.nml <fixed>.nml
 
 ```
