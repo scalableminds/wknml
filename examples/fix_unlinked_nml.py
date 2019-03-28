@@ -64,19 +64,17 @@ for i in range(n_components):
     old_new_mapping[old_tree.id].append(i)
     new_trees.append(new_tree)
 
-max_tree_id = max(t.id for t in new_trees)
-
-new_trees2 = []
+new_trees_with_groups = []
 new_groups = []
 for i, (old_id, new_ids) in enumerate(old_new_mapping.items()):
-    group_id = i + max_tree_id + 1
+    group_id = i + 1
     old_tree = find(lambda t: t.id == old_id, file.trees)
     new_groups.append(wknml.Group(id=group_id, name=old_tree.name))
     for new_id in new_ids:
         new_tree = find(lambda t: t.id == new_id, new_trees)
-        new_trees2.append(new_tree._replace(groupId=group_id))
+        new_trees_with_groups.append(new_tree._replace(groupId=group_id))
 
-file = file._replace(trees=new_trees2, groups=new_groups)
+file = file._replace(trees=new_trees_with_groups, groups=new_groups)
 
 with open(args.target, "wb") as f:
     f.write(ET.tostring(wknml.dump_nml(file)))
