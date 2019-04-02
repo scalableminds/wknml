@@ -84,7 +84,7 @@ def create_merged_nml(nml: NML, scale):
 def load_and_save_merged_nml_trees(source: str, destination: str, scale):
 
   assert os.path.isfile(source), "No file was provided as source."
-  assert os.path.exists(os.path.dirname(destination)), "The destination directory does not exists."
+  assert os.path.exists(os.path.dirname(os.path.realpath(destination))), "The destination directory does not exists."
 
   logger.info("Reading data")
   nml_root = ET.parse(source).getroot()
