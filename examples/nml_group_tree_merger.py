@@ -68,7 +68,7 @@ def merge_trees_to_one_tree(trees: List[Tree], scale):
 
 
 def create_merged_nml(nml: NML, scale):
-  merged_nml = NML(nml.parameters, [], nml.branchpoints, nml.comments, nml.groups)
+  merged_nml = nml._replace(trees=[], groups=[])
 
   for current_group in nml.groups:
     group_id = current_group.id
@@ -76,8 +76,8 @@ def create_merged_nml(nml: NML, scale):
 
     trees_to_be_merged = find_tress_by_id(nml.trees, group_id)
     merged_tree = merge_trees_to_one_tree(trees_to_be_merged, scale)[0]
+    merged_tree = merged_tree._replace(groupId=None)
     merged_nml.trees.append(merged_tree)
-
   return merged_nml
 
 
