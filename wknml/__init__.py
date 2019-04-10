@@ -1,4 +1,5 @@
 import xml.etree.ElementTree as ET
+from lxml import etree
 from typing import NamedTuple, List, Tuple, Optional
 
 Vector3 = Tuple[float, float, float]
@@ -238,57 +239,41 @@ def parse_nml(nml_root):
     )
 
 
-def dump_parameters(parameters):
-    nml_parameters = ET.Element("parameters")
-    ET.SubElement(nml_parameters, "experiment", {"name": parameters.name})
-    ET.SubElement(nml_parameters, "time", {"ms": str(parameters.time)})
-    ET.SubElement(
-        nml_parameters,
-        "scale",
-        {
+def dump_parameters(xf, parameters):
+    with xf.element("parameters"):
+        write_element(xf, "experiment", {"name": parameters.name})
+        write_element(xf, "time", {"ms": str(parameters.time)})
+        write_element(xf, "scale", {
             "x": str(parameters.scale[0]),
             "y": str(parameters.scale[1]),
             "z": str(parameters.scale[2]),
-        },
-    )
-    ET.SubElement(
-        nml_parameters,
-        "editPosition",
-        {
+        })
+        write_element(xf, "editPosition", {
             "x": str(parameters.editPosition[0]),
             "y": str(parameters.editPosition[1]),
             "z": str(parameters.editPosition[2]),
-        },
-    )
-    ET.SubElement(
-        nml_parameters,
-        "editRotation",
-        {
+        })
+        write_element(xf, "editRotation", {
             "xRot": str(parameters.editRotation[0]),
             "yRot": str(parameters.editRotation[1]),
             "zRot": str(parameters.editRotation[2]),
-        },
-    )
-    ET.SubElement(nml_parameters, "zoomLevel", {"zoom": str(parameters.zoomLevel)})
+        })
+        write_element(xf, "zoomLevel", {"zoom": str(parameters.zoomLevel)})
 
-    if parameters.taskBoundingBox is not None:
-        ET.SubElement(
-            nml_parameters,
-            "taskBoundingBox",
-            {
+        if parameters.taskBoundingBox is not None:
+            write_element(xf, "taskBoundingBox", {
                 "topLeftX": str(parameters.taskBoundingBox[0]),
                 "topLeftY": str(parameters.taskBoundingBox[1]),
                 "topLeftZ": str(parameters.taskBoundingBox[2]),
                 "width": str(parameters.taskBoundingBox[3]),
                 "height": str(parameters.taskBoundingBox[4]),
                 "depth": str(parameters.taskBoundingBox[5]),
-            },
-        )
-    return nml_parameters
+            })
 
+def write_element(xf, name, attr):
+    xf.write(etree.Element(name, attr))
 
-def dump_node(node):
-
+def dump_node(xf, node):
     attributes = {
         "id": str(node.id),
         "radius": str(node.radius),
@@ -317,15 +302,14 @@ def dump_node(node):
     if node.time is not None:
         attributes["time"] = str(node.time)
 
-    return ET.Element("node", attributes)
+    write_element(xf, "node", attributes)
 
 
-def dump_edge(edge):
-    return ET.Element("edge", {"source": str(edge.source), "target": str(edge.target)})
+def dump_edge(xf, edge):
+    write_element(xf, "edge", {"source": str(edge.source), "target": str(edge.target)})
 
 
-def dump_tree(tree):
-    
+def dump_tree(xf, tree):
     attributes = {
         "id": str(tree.id),
         "color.r": str(tree.color[0]),
@@ -338,49 +322,39 @@ def dump_tree(tree):
     if tree.groupId is not None:
         attributes["groupId"] = str(tree.groupId)
     
-    nml_tree = ET.Element("thing", attributes)
-    nml_nodes = ET.SubElement(nml_tree, "nodes")
-    for n in tree.nodes:
-        nml_nodes.append(dump_node(n))
-    nml_edges = ET.SubElement(nml_tree, "edges")
-    for e in tree.edges:
-        nml_edges.append(dump_edge(e))
-    return nml_tree
+    with xf.element("thing", attributes):
+        with xf.element("nodes"):
+            for n in tree.nodes: dump_node(xf, n)
+        with xf.element("edges"):
+            for e in tree.edges: dump_edge(xf, e)
 
 
-def dump_branchpoint(branchpoint):
-    return ET.Element(
+def dump_branchpoint(xf, branchpoint):
+    write_element(xf, 
         "branchpoint", {"id": str(branchpoint.id), "time": str(branchpoint.time)}
     )
 
 
-def dump_comment(comment):
-    return ET.Element(
+def dump_comment(xf, comment):
+    write_element(xf, 
         "comment", {"node": str(comment.node), "content": comment.content}
     )
 
 
-def dump_group(group):
-    return ET.Element("group", {"id": str(group.id), "name": group.name})
+def dump_group(xf, group):
+    write_element(xf, "group", {"id": str(group.id), "name": group.name})
 
 
-def dump_nml(nml: NML):
+def dump_nml(xf, nml: NML):
+    with xf.element("things"):
+        dump_parameters(xf, nml.parameters)
+        for t in nml.trees: dump_tree(xf, t)
 
-    nml_root = ET.Element("things")
-    nml_root.append(dump_parameters(nml.parameters))
-    for t in nml.trees:
-        nml_root.append(dump_tree(t))
+        with xf.element("branchpoints"):
+            for b in nml.branchpoints: dump_branchpoint(xf, b)
 
-    nml_branchpoints = ET.SubElement(nml_root, "branchpoints")
-    for b in nml.branchpoints:
-        nml_branchpoints.append(dump_branchpoint(b))
+        with xf.element("comments"):
+            for c in nml.comments: dump_comment(xf, c)
 
-    nml_comments = ET.SubElement(nml_root, "comments")
-    for c in nml.comments:
-        nml_comments.append(dump_comment(c))
-
-    nml_groups = ET.SubElement(nml_root, "groups")
-    for g in nml.groups:
-        nml_groups.append(dump_group(g))
-
-    return nml_root
+        with xf.element("groups"):
+            for g in nml.groups: dump_group(xf, g)
