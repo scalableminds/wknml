@@ -1,5 +1,5 @@
 import xml.etree.ElementTree as ET
-from lxml import etree
+from loxun import XmlWriter
 from typing import NamedTuple, List, Tuple, Optional
 
 Vector3 = Tuple[float, float, float]
@@ -240,38 +240,36 @@ def parse_nml(nml_root):
 
 
 def dump_parameters(xf, parameters):
-    with xf.element("parameters"):
-        write_element(xf, "experiment", {"name": parameters.name})
-        write_element(xf, "time", {"ms": str(parameters.time)})
-        write_element(xf, "scale", {
-            "x": str(parameters.scale[0]),
-            "y": str(parameters.scale[1]),
-            "z": str(parameters.scale[2]),
-        })
-        write_element(xf, "editPosition", {
-            "x": str(parameters.editPosition[0]),
-            "y": str(parameters.editPosition[1]),
-            "z": str(parameters.editPosition[2]),
-        })
-        write_element(xf, "editRotation", {
-            "xRot": str(parameters.editRotation[0]),
-            "yRot": str(parameters.editRotation[1]),
-            "zRot": str(parameters.editRotation[2]),
-        })
-        write_element(xf, "zoomLevel", {"zoom": str(parameters.zoomLevel)})
+    xf.startTag("parameters")
+    xf.tag("experiment", {"name": parameters.name})
+    xf.tag("time", {"ms": str(parameters.time)})
+    xf.tag("scale", {
+        "x": str(parameters.scale[0]),
+        "y": str(parameters.scale[1]),
+        "z": str(parameters.scale[2]),
+    })
+    xf.tag("editPosition", {
+        "x": str(parameters.editPosition[0]),
+        "y": str(parameters.editPosition[1]),
+        "z": str(parameters.editPosition[2]),
+    })
+    xf.tag("editRotation", {
+        "xRot": str(parameters.editRotation[0]),
+        "yRot": str(parameters.editRotation[1]),
+        "zRot": str(parameters.editRotation[2]),
+    })
+    xf.tag("zoomLevel", {"zoom": str(parameters.zoomLevel)})
 
-        if parameters.taskBoundingBox is not None:
-            write_element(xf, "taskBoundingBox", {
-                "topLeftX": str(parameters.taskBoundingBox[0]),
-                "topLeftY": str(parameters.taskBoundingBox[1]),
-                "topLeftZ": str(parameters.taskBoundingBox[2]),
-                "width": str(parameters.taskBoundingBox[3]),
-                "height": str(parameters.taskBoundingBox[4]),
-                "depth": str(parameters.taskBoundingBox[5]),
-            })
-
-def write_element(xf, name, attr):
-    xf.write(etree.Element(name, attr))
+    if parameters.taskBoundingBox is not None:
+        xf.tag("taskBoundingBox", {
+            "topLeftX": str(parameters.taskBoundingBox[0]),
+            "topLeftY": str(parameters.taskBoundingBox[1]),
+            "topLeftZ": str(parameters.taskBoundingBox[2]),
+            "width": str(parameters.taskBoundingBox[3]),
+            "height": str(parameters.taskBoundingBox[4]),
+            "depth": str(parameters.taskBoundingBox[5]),
+        })
+    xf.endTag() # parameters
 
 def dump_node(xf, node):
     attributes = {
@@ -302,11 +300,11 @@ def dump_node(xf, node):
     if node.time is not None:
         attributes["time"] = str(node.time)
 
-    write_element(xf, "node", attributes)
+    xf.tag("node", attributes)
 
 
 def dump_edge(xf, edge):
-    write_element(xf, "edge", {"source": str(edge.source), "target": str(edge.target)})
+    xf.tag("edge", {"source": str(edge.source), "target": str(edge.target)})
 
 
 def dump_tree(xf, tree):
@@ -322,39 +320,51 @@ def dump_tree(xf, tree):
     if tree.groupId is not None:
         attributes["groupId"] = str(tree.groupId)
     
-    with xf.element("thing", attributes):
-        with xf.element("nodes"):
-            for n in tree.nodes: dump_node(xf, n)
-        with xf.element("edges"):
-            for e in tree.edges: dump_edge(xf, e)
+    xf.startTag("thing", attributes)
+    xf.startTag("nodes")
+    for n in tree.nodes: dump_node(xf, n)
+    xf.endTag() # nodes
+    xf.startTag("edges")
+    for e in tree.edges: dump_edge(xf, e)
+    xf.endTag() # edges
+    xf.endTag() # thing
 
 
 def dump_branchpoint(xf, branchpoint):
-    write_element(xf, 
+    xf.tag(
         "branchpoint", {"id": str(branchpoint.id), "time": str(branchpoint.time)}
     )
 
 
 def dump_comment(xf, comment):
-    write_element(xf, 
+    xf.tag(
         "comment", {"node": str(comment.node), "content": comment.content}
     )
 
 
 def dump_group(xf, group):
-    write_element(xf, "group", {"id": str(group.id), "name": group.name})
+    xf.tag("group", {"id": str(group.id), "name": group.name})
 
 
 def dump_nml(xf, nml: NML):
-    with xf.element("things"):
-        dump_parameters(xf, nml.parameters)
-        for t in nml.trees: dump_tree(xf, t)
+    xf.startTag("things")
+    dump_parameters(xf, nml.parameters)
+    for t in nml.trees: dump_tree(xf, t)
 
-        with xf.element("branchpoints"):
-            for b in nml.branchpoints: dump_branchpoint(xf, b)
+    xf.startTag("branchpoints")
+    for b in nml.branchpoints: dump_branchpoint(xf, b)
+    xf.endTag() # branchpoints
 
-        with xf.element("comments"):
-            for c in nml.comments: dump_comment(xf, c)
+    xf.startTag("comments")
+    for c in nml.comments: dump_comment(xf, c)
+    xf.endTag() # comments
 
-        with xf.element("groups"):
-            for g in nml.groups: dump_group(xf, g)
+    xf.startTag("groups")
+    for g in nml.groups: dump_group(xf, g)
+    xf.endTag() # groups
+    xf.endTag() # things
+
+def write_nml(f, nml: NML):
+    with XmlWriter(f) as xf:
+        dump_nml(xf, nml)
+
