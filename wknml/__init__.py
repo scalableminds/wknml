@@ -1,26 +1,40 @@
 import xml.etree.ElementTree as ET
 from loxun import XmlWriter
 from typing import NamedTuple, List, Tuple, Optional
+import collections
 
 Vector3 = Tuple[float, float, float]
 Vector4 = Tuple[float, float, float, float]
 IntVector6 = Tuple[int, int, int, int, int, int]
 
-NMLParameters = NamedTuple(
+# From https://stackoverflow.com/a/18348004
+# Use the defaults parameter when switching to Python 3.6
+def NamedTupleWithDefaults(typename, field_names, default_values=()):
+    T = NamedTuple(typename, field_names)
+    T.__new__.__defaults__ = (None,) * len(T._fields)
+    if isinstance(default_values, collections.Mapping):
+        prototype = T(**default_values)
+    else:
+        prototype = T(*default_values)
+    T.__new__.__defaults__ = tuple(prototype)
+    return T
+
+NMLParameters = NamedTupleWithDefaults(
   "NMLParameters",
   [
     ("name", str),
     ("scale", Vector3),
-    ("offset", Vector3),
-    ("time", int),
-    ("editPosition", Vector3),
-    ("editRotation", Vector3),
-    ("zoomLevel", float),
+    ("offset", Optional[Vector3]),
+    ("time", Optional[int]),
+    ("editPosition", Optional[Vector3]),
+    ("editRotation", Optional[Vector3]),
+    ("zoomLevel", Optional[float]),
     ("taskBoundingBox", Optional[IntVector6]),
     ("userBoundingBox", Optional[IntVector6]),
   ],
+  (None,) * 7
 )
-Node = NamedTuple(
+Node = NamedTupleWithDefaults(
   "Node",
   [
     ("id", int),
@@ -33,6 +47,7 @@ Node = NamedTuple(
     ("interpolation", Optional[bool]),
     ("time", Optional[int]),
   ],
+  (None,) * 6
 )
 Edge = NamedTuple(
   "Edge",
@@ -41,16 +56,17 @@ Edge = NamedTuple(
     ("target", int),
   ],
 )
-Tree = NamedTuple(
+Tree = NamedTupleWithDefaults(
   "Tree",
   [
     ("id", int),
     ("color", Vector4),
     ("name", str),
-    ("groupId", Optional[int]),
     ("nodes", List[Node]),
     ("edges", List[Edge]),
+    ("groupId", Optional[int]),
   ],
+  (None,) * 1
 )
 Branchpoint = NamedTuple(
   "Branchpoint",
@@ -297,23 +313,28 @@ def dump_bounding_box(xf, parameters, prefix):
 def dump_parameters(xf, parameters):
     xf.startTag("parameters")
     xf.tag("experiment", {"name": parameters.name})
-    xf.tag("time", {"ms": str(parameters.time)})
     xf.tag("scale", {
         "x": str(parameters.scale[0]),
         "y": str(parameters.scale[1]),
         "z": str(parameters.scale[2]),
     })
-    xf.tag("editPosition", {
-        "x": str(parameters.editPosition[0]),
-        "y": str(parameters.editPosition[1]),
-        "z": str(parameters.editPosition[2]),
-    })
-    xf.tag("editRotation", {
-        "xRot": str(parameters.editRotation[0]),
-        "yRot": str(parameters.editRotation[1]),
-        "zRot": str(parameters.editRotation[2]),
-    })
-    xf.tag("zoomLevel", {"zoom": str(parameters.zoomLevel)})
+
+    if parameters.time is not None:
+        xf.tag("time", {"ms": str(parameters.time)})
+    if parameters.editPosition is not None:
+        xf.tag("editPosition", {
+            "x": str(parameters.editPosition[0]),
+            "y": str(parameters.editPosition[1]),
+            "z": str(parameters.editPosition[2]),
+        })
+    if parameters.editRotation is not None:
+        xf.tag("editRotation", {
+            "xRot": str(parameters.editRotation[0]),
+            "yRot": str(parameters.editRotation[1]),
+            "zRot": str(parameters.editRotation[2]),
+        })
+    if parameters.zoomLevel is not None:
+        xf.tag("zoomLevel", {"zoom": str(parameters.zoomLevel)})
 
     dump_bounding_box(xf, parameters, "task")
     dump_bounding_box(xf, parameters, "user")
