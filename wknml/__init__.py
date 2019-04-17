@@ -17,6 +17,7 @@ NMLParameters = NamedTuple(
     ("editRotation", Vector3),
     ("zoomLevel", float),
     ("taskBoundingBox", Optional[IntVector6]),
+    ("userBoundingBox", Optional[IntVector6]),
   ],
 )
 Node = NamedTuple(
@@ -85,6 +86,20 @@ NML = NamedTuple(
   ],
 )
 
+def parse_bounding_box(nml_parameters, prefix):
+    boundingBox = None
+    bboxName = prefix + "BoundingBox"
+    if nml_parameters.find(bboxName) is not None:
+      boundingBox = (
+        int(nml_parameters.find(bboxName).get("topLeftX")),
+        int(nml_parameters.find(bboxName).get("topLeftY")),
+        int(nml_parameters.find(bboxName).get("topLeftZ")),
+        int(nml_parameters.find(bboxName).get("width")),
+        int(nml_parameters.find(bboxName).get("height")),
+        int(nml_parameters.find(bboxName).get("depth")),
+      )
+    return boundingBox
+
 
 def parse_parameters(nml_parameters):
     offset = (0, 0, 0)
@@ -119,16 +134,8 @@ def parse_parameters(nml_parameters):
     if nml_parameters.find("zoomLevel") is not None:
         zoomLevel = nml_parameters.find("zoomLevel").get("zoom")
 
-    taskBoundingBox = None
-    if nml_parameters.find("taskBoundingBox") is not None:
-      taskBoundingBox = (
-        int(nml_parameters.find("taskBoundingBox").get("topLeftX")),
-        int(nml_parameters.find("taskBoundingBox").get("topLeftY")),
-        int(nml_parameters.find("taskBoundingBox").get("topLeftZ")),
-        int(nml_parameters.find("taskBoundingBox").get("width")),
-        int(nml_parameters.find("taskBoundingBox").get("height")),
-        int(nml_parameters.find("taskBoundingBox").get("depth")),
-      )
+    taskBoundingBox = parse_bounding_box(nml_parameters, "task")
+    userBoundingBox = parse_bounding_box(nml_parameters, "user")
 
     return NMLParameters(
         name=nml_parameters.find("experiment").get("name"),
@@ -142,7 +149,8 @@ def parse_parameters(nml_parameters):
         editPosition=editPosition,
         editRotation=editRotation,
         zoomLevel=zoomLevel,
-        taskBoundingBox=taskBoundingBox
+        taskBoundingBox=taskBoundingBox,
+        userBoundingBox=userBoundingBox,
     )
 
 
@@ -271,6 +279,20 @@ def parse_nml(filename):
         groups=root_group.children,
     )
 
+def dump_bounding_box(xf, parameters, prefix):
+    bboxName = prefix + "BoundingBox"
+    parametersBox = getattr(parameters, bboxName)
+
+    if parametersBox is not None:
+        xf.tag(bboxName, {
+            "topLeftX": str(parametersBox[0]),
+            "topLeftY": str(parametersBox[1]),
+            "topLeftZ": str(parametersBox[2]),
+            "width": str(parametersBox[3]),
+            "height": str(parametersBox[4]),
+            "depth": str(parametersBox[5]),
+        })
+
 
 def dump_parameters(xf, parameters):
     xf.startTag("parameters")
@@ -293,18 +315,14 @@ def dump_parameters(xf, parameters):
     })
     xf.tag("zoomLevel", {"zoom": str(parameters.zoomLevel)})
 
-    if parameters.taskBoundingBox is not None:
-        xf.tag("taskBoundingBox", {
-            "topLeftX": str(parameters.taskBoundingBox[0]),
-            "topLeftY": str(parameters.taskBoundingBox[1]),
-            "topLeftZ": str(parameters.taskBoundingBox[2]),
-            "width": str(parameters.taskBoundingBox[3]),
-            "height": str(parameters.taskBoundingBox[4]),
-            "depth": str(parameters.taskBoundingBox[5]),
-        })
+    dump_bounding_box(xf, parameters, "task")
+    dump_bounding_box(xf, parameters, "user")
+
     xf.endTag() # parameters
 
+
 def dump_node(xf, node):
+
     attributes = {
         "id": str(node.id),
         "radius": str(node.radius),
