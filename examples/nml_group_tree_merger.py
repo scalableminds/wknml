@@ -87,8 +87,7 @@ def load_and_save_merged_nml_trees(source: str, destination: str, scale):
   assert os.path.exists(os.path.dirname(os.path.realpath(destination))), "The destination directory does not exists."
 
   logger.info("Reading data")
-  nml_root = ET.parse(source).getroot()
-  nml = parse_nml(nml_root)
+  nml = parse_nml(source)
 
   logger.info("Starting to merge tree groups")
   merged_nml = create_merged_nml(nml, scale)

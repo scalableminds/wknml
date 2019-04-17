@@ -22,7 +22,7 @@ parser.add_argument("target", help="Target NML file")
 args = parser.parse_args()
 
 
-nml = wknml.parse_nml(ET.parse(args.source).getroot())
+nml = wknml.parse_nml(args.source)
 
 all_nodes = flatten([t.nodes for t in nml.trees])
 all_edges = flatten([t.edges for t in nml.trees])
@@ -69,7 +69,7 @@ new_groups = []
 for i, (old_id, new_ids) in enumerate(old_new_mapping.items()):
     group_id = i + 1
     old_tree = find(lambda t: t.id == old_id, nml.trees)
-    new_groups.append(wknml.Group(id=group_id, name=old_tree.name))
+    new_groups.append(wknml.Group(id=group_id, name=old_tree.name, children=[]))
     for new_id in new_ids:
         new_tree = find(lambda t: t.id == new_id, new_trees)
         new_trees_with_groups.append(new_tree._replace(groupId=group_id))

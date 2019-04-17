@@ -63,6 +63,7 @@ Group = NamedTuple(
   [
     ("id", int),
     ("name", str),
+    ("children", List["Group"])
   ],
 )
 Comment = NamedTuple(
@@ -163,7 +164,7 @@ def parse_node(nml_node):
         inMag=int(nml_node.get("inMag", default=0)),
         bitDepth=int(nml_node.get("bitDepth", default=8)),
         interpolation=bool(nml_node.get("interpolation", default=True)),
-        time=int(nml_node.get("time")),
+        time=int(nml_node.get("time", default=0)),
     )
 
 
@@ -178,7 +179,7 @@ def parse_tree(nml_tree):
     if "name" in nml_tree.attrib:
         name = nml_tree.get("name")
 
-    color = (0, 0, 0, 1)
+    color = (1, 0, 0, 1)
     if "color.r" in nml_tree.attrib:
         color = (
             float(nml_tree.get("color.r")),
@@ -193,13 +194,14 @@ def parse_tree(nml_tree):
             float(nml_tree.get("colorb")),
             float(nml_tree.get("colora")),
         )
+    groupId = int(nml_tree.get("groupId", default=-1))
 
     return Tree(
-        nodes=[parse_node(n) for n in nml_tree.find("nodes")],
-        edges=[parse_edge(e) for e in nml_tree.find("edges")],
+        nodes=[],
+        edges=[],
         id=int(nml_tree.get("id")),
         name=name,
-        groupId=int(nml_tree.get("groupId", default=1)),
+        groupId=groupId if groupId >= 0 else None,
         color=color,
     )
 
@@ -213,29 +215,60 @@ def parse_comment(nml_comment):
 
 
 def parse_group(nml_group):
-    return Group(int(nml_group.get("id")), nml_group.get("name", default=""))
+    return Group(int(nml_group.get("id")), nml_group.get("name", default=""), [])
 
 
-def parse_nml(nml_root):
-
-    groups = [Group(id=1, name="")]
-    if nml_root.find("groups") is not None:
-      groups = [parse_group(g) for g in nml_root.find("groups")]
-
+def parse_nml(filename):
+    parameters = None
+    trees = []
     branchpoints = []
-    if nml_root.find("branchpoints") is not None:
-      branchpoints = [parse_branchpoint(b) for b in nml_root.find("branchpoints")]
-
     comments = []
-    if nml_root.find("comments") is not None:
-      comments = [parse_comment(c) for c in nml_root.find("comments")]
+    current_tree = None
+    root_group = Group(-1, "", [])
+    group_stack = [root_group]
+    element_stack = []
+
+    for event, elem in ET.iterparse(filename, events=("start", "end")):
+        if event == "start":
+            element_stack.append(elem)
+            if elem.tag == "thing":
+                current_tree = parse_tree(elem)
+                trees.append(current_tree)
+            elif elem.tag == "node":
+                assert current_tree is not None, "<node ...> tag needs to be child of a <thing ...> tag."
+                current_tree.nodes.append(parse_node(elem))
+            elif elem.tag == "edge":
+                assert current_tree is not None, "<edge ...> tag needs to be child of a <thing ...> tag."
+                current_tree.edges.append(parse_edge(elem))
+            elif elem.tag == "branchpoint":
+                branchpoints.append(parse_branchpoint(elem))
+            elif elem.tag == "comment":
+                comments.append(parse_comment(elem))
+            elif elem.tag == "group":
+                group = parse_group(elem)
+                group_stack[-1].children.append(group)
+                group_stack.append(group)
+        elif event == "end":
+            if elem.tag == "parameters":
+                parameters = parse_parameters(elem)
+            elif elem.tag == "thing":
+                current_tree = None
+            elif elem.tag == "group":
+                group_stack.pop()
+
+            element_stack.pop()
+            # Do not clear the elements of the parameters tag as we want to parse those all at once
+            # when the closing parameters tag is parsed
+            if len(element_stack) and element_stack[-1].tag != "parameters":
+                # Discard the element to save memory
+                elem.clear()
 
     return NML(
-        parameters=parse_parameters(nml_root.find("parameters")),
-        trees=[parse_tree(t) for t in nml_root.iter("thing")],
+        parameters=parameters,
+        trees=trees,
         branchpoints=branchpoints,
         comments=comments,
-        groups=groups,
+        groups=root_group.children,
     )
 
 
@@ -343,7 +376,9 @@ def dump_comment(xf, comment):
 
 
 def dump_group(xf, group):
-    xf.tag("group", {"id": str(group.id), "name": group.name})
+    xf.startTag("group", {"id": str(group.id), "name": group.name})
+    for g in group.children: dump_group(xf, g)
+    xf.endTag() # group
 
 
 def dump_nml(xf, nml: NML):
