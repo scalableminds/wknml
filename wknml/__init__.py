@@ -242,7 +242,7 @@ def parse_group(nml_group):
     return Group(int(nml_group.get("id")), nml_group.get("name", default=""), [])
 
 
-def parse_nml(filename):
+def parse_nml(file):
     parameters = None
     trees = []
     branchpoints = []
@@ -252,7 +252,7 @@ def parse_nml(filename):
     group_stack = [root_group]
     element_stack = []
 
-    for event, elem in ET.iterparse(filename, events=("start", "end")):
+    for event, elem in ET.iterparse(file, events=("start", "end")):
         if event == "start":
             element_stack.append(elem)
             if elem.tag == "thing":
@@ -438,7 +438,7 @@ def dump_nml(xf, nml: NML):
     xf.endTag() # groups
     xf.endTag() # things
 
-def write_nml(f, nml: NML):
-    with XmlWriter(f) as xf:
+def write_nml(file, nml: NML):
+    with XmlWriter(file) as xf:
         dump_nml(xf, nml)
 

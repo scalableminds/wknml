@@ -21,8 +21,8 @@ parser.add_argument("source", help="Source NML file")
 parser.add_argument("target", help="Target NML file")
 args = parser.parse_args()
 
-
-nml = wknml.parse_nml(args.source)
+with open(args.source, "rb") as f:
+    nml = wknml.parse_nml(f)
 
 all_nodes = flatten([t.nodes for t in nml.trees])
 all_edges = flatten([t.edges for t in nml.trees])
