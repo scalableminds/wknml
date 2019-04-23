@@ -4,7 +4,7 @@ import os
 import numpy as np
 import xml.etree.ElementTree as ET
 from math import inf
-from wknml import Edge, Tree, NML, parse_nml, dump_nml
+from wknml import Edge, Tree, NML, parse_nml, write_nml
 from typing import List, Tuple
 
 
@@ -16,7 +16,7 @@ logging.basicConfig(
 logger = logging.getLogger(__file__)
 
 
-def find_tress_by_id(trees: List[Tree], group_id: int):
+def find_trees_by_id(trees: List[Tree], group_id: int):
   trees_with_group_id = []
   for current_tree in trees:
     if current_tree.groupId == group_id:
@@ -74,7 +74,7 @@ def create_merged_nml(nml: NML, scale):
     group_id = current_group.id
     logger.info("Starting to merge group with id: {} and name: {}".format(group_id, current_group.name))
 
-    trees_to_be_merged = find_tress_by_id(nml.trees, group_id)
+    trees_to_be_merged = find_trees_by_id(nml.trees, group_id)
     merged_tree = merge_trees_to_one_tree(trees_to_be_merged, scale)[0]
     merged_tree = merged_tree._replace(groupId=None)
     merged_nml.trees.append(merged_tree)
@@ -87,19 +87,15 @@ def load_and_save_merged_nml_trees(source: str, destination: str, scale):
   assert os.path.exists(os.path.dirname(os.path.realpath(destination))), "The destination directory does not exists."
 
   logger.info("Reading data")
-  nml_root = ET.parse(source).getroot()
-  nml = parse_nml(nml_root)
+  with open(source, "rb") as f:
+    nml = parse_nml(f)
 
   logger.info("Starting to merge tree groups")
   merged_nml = create_merged_nml(nml, scale)
 
   logger.info("Writing data")
-  merged_nml_xml = dump_nml(merged_nml)
-
-  merged_nml_tree = ET.ElementTree()
-  merged_nml_tree._setroot(merged_nml_xml)
-
-  merged_nml_tree.write(destination)
+  with open(destination, "wb") as f:
+    write_nml(f, merged_nml)
 
   logger.info("Done")
 
