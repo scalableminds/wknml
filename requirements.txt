@@ -1,1 +1,3 @@
 loxun==2.0
+networkx
+numpy
