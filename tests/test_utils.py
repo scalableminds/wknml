@@ -1,6 +1,6 @@
 import wknml
 import pickle
-from tests.test_snapshot_reandandwrite import INPUT_FILES, OUTPUT_FILES, SNAPSHOT_FILES
+from tests.test_snapshot_readandwrite import INPUT_FILES, OUTPUT_FILES, SNAPSHOT_FILES
 
 
 def __save_snapshot_pickle_read_and_write():
