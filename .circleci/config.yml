@@ -21,7 +21,7 @@ jobs:
           name: Python tests
           command: |
             mkdir -p testoutput
-            pytest tests/
+            pipenv run pytest tests/
 
 workflows:
   version: 2
