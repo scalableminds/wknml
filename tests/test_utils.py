@@ -4,7 +4,7 @@ from tests.test_snapshot_readandwrite import INPUT_FILES, OUTPUT_FILES, SNAPSHOT
 
 
 def __save_snapshot_pickle_read_and_write():
-    for i in range(0, INPUT_FILES.size()):
+    for i in range(0, len(INPUT_FILES)):
         input_file = INPUT_FILES[i]
         output_file = SNAPSHOT_FILES[i]
         parsed = wknml.parse_nml(input_file)
@@ -13,7 +13,7 @@ def __save_snapshot_pickle_read_and_write():
 
 
 def __save_snapshot_nml_read_and_write():
-    for i in range(0, INPUT_FILES.size()):
+    for i in range(0, len(INPUT_FILES)):
         input_file = INPUT_FILES[i]
         output_file = OUTPUT_FILES[i]
         parsed = wknml.parse_nml(input_file)
