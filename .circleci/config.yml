@@ -1,7 +1,12 @@
 version: 2
 jobs:
   build_test:
-    machine: true
+    working_directory: ~/circleci-demo-python-django
+    docker:
+      - image: circleci/python:3.6.4 # every job must define an image for the docker executor and subsequent jobs may define a different image.
+        environment:
+          PIPENV_VENV_IN_PROJECT: true
+
     steps:
       - checkout
       - run: sudo chown -R circleci:circleci /usr/local/bin
