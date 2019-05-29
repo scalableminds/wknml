@@ -9,6 +9,7 @@ jobs:
 
     steps:
       - checkout
+      - run: sudo chown -R circleci:circleci /usr/local/bin
 
       - run:
           name: Install tools
@@ -18,7 +19,9 @@ jobs:
 
       - run:
           name: Python tests
-          command: tests/scripts/python_tests.sh
+          command: |
+            mkdir -p testoutput
+            pytest tests/
 
 workflows:
   version: 2
