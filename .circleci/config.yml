@@ -9,12 +9,12 @@ jobs:
 
     steps:
       - checkout
-      - run: sudo chown -R circleci:circleci /usr/local/bin
 
       - run:
           name: Install tools
           command: |
             sudo pip install pipenv
+            pipenv install pytest --dev
             pipenv install
 
       - run:
