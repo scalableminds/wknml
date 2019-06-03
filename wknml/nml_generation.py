@@ -1,10 +1,10 @@
-from wknml import NMLParameters, Group, Edge, Node, Tree, NML, Branchpoint
+from wknml import NMLParameters, Group, Edge, Node, Tree, NML, Branchpoint, Comment
 import networkx as nx
 import numpy as np
 
 import logging
 import colorsys
-from typing import Tuple, List, Generator, Optional, Dict, Union
+from typing import Tuple, List, Dict, Union, Any
 
 
 logger = logging.getLogger(__name__)
@@ -18,134 +18,67 @@ def random_color_rgba():
   return (r, g, b, 1)
 
 
-def generate_agglomeration_nmls(edge_list: np.ndarray,
-                                affinities: np.ndarray,
-                                thresholds: List[int],
-                                first_mapping: MappingType,
-                                segment_stats: Dict[int, SegmentStats],
-                                dataset_name: str,
-                                scale: Tuple[float, float, float],
-                                sample_size: Optional[int] = None,
-                                ids: Optional[List[int]] = None) \
-    -> Generator[Tuple[int, NML], None, None]:
+def globalize_node_ids(trees: Dict[str, List[nx.Graph]]):
+  current_id = 1
+  for tree_group in trees:
+    for tree in tree_group:
+      for node in tree.nodes:
+        old_id = node["id"]
+        node["id"] = current_id
+        for edge in tree.edges:
+            if edge[0] == old_id:
+                edge[0] = current_id
+            if edge[1] == old_id:
+                edge[1] == current_id
 
-  logger.info("Building graph for threshold {}...".format(thresholds[0]))
-  rag = nx.Graph()
-  rag.add_edges_from(edge_list[affinities >= thresholds[0]])
-  prev_threshold = thresholds[0]
-
-  if sample_size is not None:
-    logger.info("Sampling classes from first mapping...")
-    mapping_sizes = np.array([len(c) for c in first_mapping])
-    mapping_indices = np.random.choice(len(first_mapping),
-                                       size=sample_size,
-                                       replace=False,
-                                       p=(mapping_sizes / mapping_sizes.sum()))
-    ids = [min(first_mapping[i]) for i in mapping_indices]
-  else:
-    assert ids is not None, "Must provide either sample_size or segment_ids!"
-
-  colors = [random_color_rgba() for _ in ids]
-
-  for threshold in thresholds:
-
-    if threshold != thresholds[0]:
-
-      logger.info("Building graph for threshold {}...".format(threshold))
-      new_edges_mask = np.logical_and(affinities >= threshold,
-                                      affinities < prev_threshold)
-      rag.add_edges_from(edge_list[new_edges_mask])
-      prev_threshold = threshold
-
-    logger.info("Selecting equivalence classes for threshold {}..".format(threshold))
-    filtered_mapping = []
-    for segment_id in ids:
-      filtered_mapping.append(nx.node_connected_component(rag, segment_id))
-
-    logger.info("Selecting subgraphs for threshold {}...".format(threshold))
-    subgraphs = list(get_subgraphs(rag, filtered_mapping, ids, colors))
-
-    logger.info("Building NML for threshold {}...".format(threshold))
-    nml = generate_nml(dataset_name, scale, subgraphs, segment_stats, "Threshold {}".format(threshold))
-
-    yield threshold, nml
+        current_id += 1
 
 
-def get_subgraphs(rag: nx.Graph,
-                  mapping: MappingType,
-                  ids: List[int],
-                  colors: List[Tuple[float, float, float, float]]) \
-    -> Generator[Tuple[nx.Graph, dict], None, None]:
 
-  tree_ids = set()
+def generate_nml(group_dict: Union[List[nx.Graph], Dict[str, List[nx.Graph]]], globalize_ids: bool = True, parameters: Dict[str, Any] = {}) -> NML:
 
-  for equivalence_class, original_id, color in zip(mapping, ids, colors):
+  """ASSERTIONS SO FAR: every tree has an id, name"""
 
-    tree_id = min(equivalence_class)
-    if tree_id in tree_ids:
-      # Two trees got merged
-      continue
-    tree_ids.add(tree_id)
-
-    rag_subgraph = rag.subgraph(equivalence_class)
-    attributes = {
-      "id": tree_id,
-      "color": color,
-      "name": "Segment {} (originally {})".format(tree_id, original_id),
-    }
-
-    yield rag_subgraph, attributes
-
-def globalize_node_ids(trees: List[nx.Graph]):
-  current_id = 0
-  for tree in trees:
-    for node in tree.nodes:
-      node['id'] = current_id
-      current_id += 1
-
-
-def generate_nml(trees: Union[List[nx.Graph], Dict[str, List[nx.Graph]]], dataset_name: str = None, globalize_ids: bool = True) -> NML:
-
-  if type(trees) is dict:
-    tree_list = trees.values()
-  else:
-    tree_list = trees
+  if type(group_dict) is not dict:
+    group_dict = ["main_group", group_dict]
 
   if globalize_ids:
-    globalize_node_ids(tree_list)
+    globalize_node_ids(group_dict)
 
   nmlParameters = NMLParameters(
-    name=dataset_name,
-    scale=scale,
-    offset=(0, 0, 0),
-    time=0,
-    editPosition=(0, 0, 0),
-    editRotation=(0, 0, 0),
-    zoomLevel=0
+    name=parameters["name"] if "name" in parameters else "dataset",
+    scale=parameters["scale"] if "scale" in parameters else [11.24, 11.24, 25],
+    offset=parameters["offset"] if "offset" in parameters else (0, 0, 0),
+    time=parameters["time"] if "time" in parameters else 0,
+    editPosition=parameters["editPosition"] if "editPosition" in parameters else (0, 0, 0),
+    editRotation=parameters["editRotation"] if "editRotation" in parameters else (0, 0, 0),
+    zoomLevel=parameters["zoomLevel"] if "zoomLevel" in parameters else 0,
   )
 
-  branchpoints = []
-  comments = []
-  groups = []
+  comments = [Comment(node["id"], node["comment"]) for group in group_dict.values()
+                  for tree in group
+                  for node in tree if "comment" in node]
 
-  if group_name is not None:
-    groups = Group(id=1, name=group_name, children=[])
+  branchpoints = [Branchpoint(node["id"], 0) for group in group_dict.values()
+                  for tree in group
+                  for node in tree if "branchpoint_id" in node]
 
-  if branchpoint_ids is not None:
-    branchpoints = [Branchpoint(b, 0) for b in branchpoint_ids]
+  groups = [Group(id=group_id, name=group_name, children=[])
+            for group_id, group_name in enumerate(group_dict, 1)]
 
   trees = []
-  for tree_nx, attributes in trees_nx:
 
-    nodes, edges = extract_nodes_and_edges(tree_nx, segment_stats)
-    color = attributes["color"] if "color" in attributes else random_color_rgba()
+  for group_id, group_name in enumerate(group_dict, 1):
+    for tree in group_dict[group_name]:
+      nodes, edges = extract_nodes_and_edges_from_graph(tree)
+      color = tree.graph["color"] if "color" in tree.graph else random_color_rgba()
 
-    trees.append(Tree(nodes=nodes,
-                      edges=edges,
-                      id=attributes["id"],
-                      name=attributes["name"],
-                      groupId=(None if group_name is None else 1),
-                      color=color))
+      trees.append(Tree(nodes=nodes,
+                       edges=edges,
+                       id=tree.graph["id"],
+                       name=tree.graph["name"],
+                       groupId=group_id,
+                       color=color))
 
   nml = NML(parameters=nmlParameters,
             trees=trees,
@@ -156,20 +89,44 @@ def generate_nml(trees: Union[List[nx.Graph], Dict[str, List[nx.Graph]]], datase
   return nml
 
 
-def extract_nodes_and_edges(graph: nx.Graph,
-                            segment_stats: Dict[int, SegmentStats]) \
-    -> Tuple[List[Node], List[Edge]]:
+def generate_graph(nml: NML) -> Dict[str, List[nx.Graph]]:
+    graph_dict = {}
+    for group in NML["groups"]:
+        graphs_in_current_group = []
+        for tree in NML["trees"]:
+            if tree["groupId"] == group["id"]:
+                graphs_in_current_group.append(nml_tree_to_graph(tree))
+        graph_dict[group["name"]] = graphs_in_current_group
 
-  node_nml = []
-  edge_nml = []
+    return graph_dict
 
-  for node in graph.nodes:
 
-    node_nml.append(Node(id=node,
-                         radius=1.0,
-                         position=segment_stats[node].position))
+def nml_tree_to_graph(tree: Tree) -> nx.Graph:
+    optional_attribute_list = ["rotation", "inVp", "inMag", "bitDepth","interpolation"]
 
-  for edge in graph.edges:
-    edge_nml.append(Edge(edge[0], edge[1]))
+    graph = nx.Graph(id= tree["id"], color=tree["color"], name=tree["name"], groupId=tree["edges"])
+    for node in tree["nodes"]:
+        node_id = node["id"]
+        graph.add_node(node_id, id=node_id, radius=node["radius"], position=node["position"])
+        for optional_attribute in optional_attribute_list:
+            if node[optional_attribute] is not None:
+                graph.nodes[node_id][optional_attribute] = node[optional_attribute]
+
+    graph.add_edges_from(tree["edges"])
+    return graph
+
+
+def extract_nodes_and_edges_from_graph(graph: nx.Graph) -> Tuple[List[Node], List[Edge]]:
+  node_nml = [Node(id=graph.nodes[node_index]["id"],
+                   radius=1.0,
+                   position=graph.node[node_index]["position"],
+                   rotation=graph.node[node_index]["rotation"] if "rotation" in graph.node[node_index] else None,
+                   inVp=graph.node[node_index]["inVp"] if "inVp" in graph.node[node_index] else None,
+                   inMag=graph.node[node_index]["inMag"] if "inMag" in graph.node[node_index] else None,
+                   bitDepth=graph.node[node_index]["bitDepth"] if "bitDepth" in graph.node[node_index] else None,
+                   interpolation=graph.node[node_index]["interpolation"] if "interpolation" in graph.node[node_index] else None)
+                  for node_index in range(len(graph.nodes))]
+
+  edge_nml = [Edge(edge[0], edge[1]) for edge in graph.edges]
 
   return node_nml, edge_nml

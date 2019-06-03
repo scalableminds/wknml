@@ -45,7 +45,6 @@ Node = NamedTupleWithDefaults(
     ("inMag", Optional[int]),
     ("bitDepth", Optional[int]),
     ("interpolation", Optional[bool]),
-    ("time", Optional[int]),
   ],
   (None,) * 6
 )
