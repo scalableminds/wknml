@@ -1,6 +1,7 @@
 from wknml import NMLParameters, Group, Edge, Node, Tree, NML, Branchpoint, Comment
 from wknml.nml_generation import generate_graph, generate_nml
 
+# TODO i guess the group-children will not work here...
 def test_generate_nml():
         nodes = [Node(id=1, radius=2.0, position=[1.0, 2.0, 3.0], rotation=[0.2, 0.2, 0.2], inVp=0,
                   inMag=1, bitDepth=8, interpolation=True),
