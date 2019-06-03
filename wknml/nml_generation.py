@@ -53,6 +53,8 @@ def generate_nml(group_dict: Union[List[nx.Graph], Dict[str, List[nx.Graph]]], g
     editPosition=parameters["editPosition"] if "editPosition" in parameters else (0, 0, 0),
     editRotation=parameters["editRotation"] if "editRotation" in parameters else (0, 0, 0),
     zoomLevel=parameters["zoomLevel"] if "zoomLevel" in parameters else 0,
+    taskBoundingBox=parameters["taskBoundingBox"] if "taskBoundingBox" in parameters else None,
+    userBoundingBox=parameters["userBoundingBox"] if "userBoundingBox" in parameters else None,
   )
 
   comments = [Comment(node["id"], node["comment"]) for group in group_dict.values()
@@ -89,7 +91,7 @@ def generate_nml(group_dict: Union[List[nx.Graph], Dict[str, List[nx.Graph]]], g
   return nml
 
 
-def generate_graph(nml: NML) -> Dict[str, List[nx.Graph]]:
+def generate_graph(nml: NML) -> Tuple[Dict[str, List[nx.Graph]], Dict]:
     graph_dict = {}
     for group in NML["groups"]:
         graphs_in_current_group = []
@@ -98,7 +100,15 @@ def generate_graph(nml: NML) -> Dict[str, List[nx.Graph]]:
                 graphs_in_current_group.append(nml_tree_to_graph(tree))
         graph_dict[group["name"]] = graphs_in_current_group
 
-    return graph_dict
+    nml_parameters = NML["parameters"]
+    parameter_dict = {"name": nml_parameters["name"], "scale": nml_parameters["scale"]}
+    optional_parameters = ["offset", "time", "editPosition", "editRotation",
+                               "zoomLevel", "taskBoundingBox", "userBoundingBox"]
+    for optional_parameter in optional_parameters:
+        if optional_parameter in nml_parameters:
+            parameter_dict[optional_parameter] = nml_parameters[optional_parameter]
+
+    return (graph_dict, parameter_dict)
 
 
 def nml_tree_to_graph(tree: Tree) -> nx.Graph:
@@ -113,6 +123,7 @@ def nml_tree_to_graph(tree: Tree) -> nx.Graph:
                 graph.nodes[node_id][optional_attribute] = node[optional_attribute]
 
     graph.add_edges_from(tree["edges"])
+
     return graph
 
 
