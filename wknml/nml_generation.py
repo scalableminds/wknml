@@ -93,36 +93,41 @@ def generate_nml(group_dict: Union[List[nx.Graph], Dict[str, List[nx.Graph]]], g
 
 def generate_graph(nml: NML) -> Tuple[Dict[str, List[nx.Graph]], Dict]:
     graph_dict = {}
-    for group in NML["groups"]:
+    for group in nml.groups:
         graphs_in_current_group = []
-        for tree in NML["trees"]:
-            if tree["groupId"] == group["id"]:
+        for tree in nml.trees:
+            if tree.groupId == group.id:
                 graphs_in_current_group.append(nml_tree_to_graph(tree))
-        graph_dict[group["name"]] = graphs_in_current_group
+        graph_dict[group.name] = graphs_in_current_group
 
-    nml_parameters = NML["parameters"]
-    parameter_dict = {"name": nml_parameters["name"], "scale": nml_parameters["scale"]}
-    optional_parameters = ["offset", "time", "editPosition", "editRotation",
-                               "zoomLevel", "taskBoundingBox", "userBoundingBox"]
-    for optional_parameter in optional_parameters:
-        if optional_parameter in nml_parameters:
-            parameter_dict[optional_parameter] = nml_parameters[optional_parameter]
+    nml_parameters = nml.parameters
+    parameter_dict = {}
 
-    return (graph_dict, parameter_dict)
+    parameter_dict["name"] = nml_parameters.name
+    parameter_dict["scale"] = nml_parameters.scale
+    parameter_dict["offset"] = nml_parameters.offset
+    parameter_dict["time"] = nml_parameters.time
+    parameter_dict["editPosition"] = nml_parameters.editPosition
+    parameter_dict["editRotation"] = nml_parameters.editRotation
+    parameter_dict["zoomLevel"] = nml_parameters.zoomLevel
+    parameter_dict["taskBoundingBox"] = nml_parameters.taskBoundingBox
+    parameter_dict["userBoundingBox"] = nml_parameters.userBoundingBox
+
+    return graph_dict, parameter_dict
 
 
 def nml_tree_to_graph(tree: Tree) -> nx.Graph:
     optional_attribute_list = ["rotation", "inVp", "inMag", "bitDepth","interpolation"]
 
-    graph = nx.Graph(id= tree["id"], color=tree["color"], name=tree["name"], groupId=tree["edges"])
-    for node in tree["nodes"]:
-        node_id = node["id"]
-        graph.add_node(node_id, id=node_id, radius=node["radius"], position=node["position"])
+    graph = nx.Graph(id= tree.id, color=tree.color, name=tree.name, groupId=tree.groupId)
+    for node in tree.nodes:
+        node_id = node.id
+        graph.add_node(node_id, id=node_id, radius=node.radius, position=node.position)
         for optional_attribute in optional_attribute_list:
-            if node[optional_attribute] is not None:
-                graph.nodes[node_id][optional_attribute] = node[optional_attribute]
+            if getattr(node, optional_attribute) is not None:
+                graph.nodes[node_id][optional_attribute] = getattr(node, optional_attribute)
 
-    graph.add_edges_from(tree["edges"])
+    graph.add_edges_from([(edge.source, edge.target) for edge in tree.edges])
 
     return graph
 

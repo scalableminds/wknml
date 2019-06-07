@@ -31,13 +31,13 @@ def test_generate_nml():
                  Tree(nodes=nodes[3:6],
                       edges=edges[3:6],
                       id=2,
-                      name="tree1",
+                      name="tree2",
                       groupId=2,
                       color=(0.4, 0.3, 0.8, 1.0)),
                  Tree(nodes=nodes[6:],
                       edges=edges[6:],
                       id=3,
-                      name="tree1",
+                      name="tree3",
                       groupId=2,
                       color=(0.4, 0.3, 0.8, 1.0))
                  ]
@@ -66,7 +66,7 @@ def test_generate_nml():
 
         graphs = []
 
-        graph = generate_graph(expected_nml)
+        (graph, parameter_dict) = generate_graph(expected_nml)
         test_result_nml = generate_nml(graph)
 
         assert test_result_nml == expected_nml
