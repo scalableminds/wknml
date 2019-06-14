@@ -17,32 +17,44 @@ def random_color_rgba():
   r, g, b = colorsys.hls_to_rgb(h, l, s)
   return (r, g, b, 1)
 
+def globalize_tree_ids(group_dict: Dict[str, List[nx.Graph]]):
+    current_id = 1
+    for tree_group in group_dict.values():
+        for tree in tree_group:
+            tree.graph["id"] = current_id
+            current_id += 1
 
-def globalize_node_ids(trees: Dict[str, List[nx.Graph]]):
-  current_id = 1
-  for tree_group in trees:
-    for tree in tree_group:
-      for node in tree.nodes:
-        old_id = node["id"]
-        node["id"] = current_id
-        for edge in tree.edges:
-            if edge[0] == old_id:
-                edge[0] = current_id
-            if edge[1] == old_id:
-                edge[1] == current_id
 
-        current_id += 1
+def globalize_node_ids(group_dict: Dict[str, List[nx.Graph]]):
+    current_id = 1
+    for tree_group in group_dict.values():
+        for tree_index in range(len(tree_group)):
+            tree = tree_group[tree_index]
+            new_tree = nx.Graph(**tree.graph)
+            edge_mapping_dict = {}
+            for node in tree.node:
+                old_id = tree.nodes[node]["id"]
+                tree.nodes[node]["id"] = current_id
+                edge_mapping_dict[old_id] = current_id
+                new_tree.add_node(current_id, **tree.nodes[node])
 
+                current_id += 1
+            new_edges = []
+            for edge in tree.edges:
+                new_edges.append((edge_mapping_dict[edge[0]], edge_mapping_dict[edge[1]]))
+
+            new_tree.add_edges_from(new_edges)
+            tree_group[tree_index] = new_tree
 
 
 def generate_nml(group_dict: Union[List[nx.Graph], Dict[str, List[nx.Graph]]], globalize_ids: bool = True, parameters: Dict[str, Any] = {}) -> NML:
 
-  """ASSERTIONS SO FAR: every tree has an id, name"""
-
   if type(group_dict) is not dict:
     group_dict = ["main_group", group_dict]
 
+    # todo ensure graph attributes and globalize tree ids and maybe group ids
   if globalize_ids:
+    globalize_tree_ids(group_dict)
     globalize_node_ids(group_dict)
 
   nmlParameters = NMLParameters(
@@ -57,13 +69,13 @@ def generate_nml(group_dict: Union[List[nx.Graph], Dict[str, List[nx.Graph]]], g
     userBoundingBox=parameters["userBoundingBox"] if "userBoundingBox" in parameters else None,
   )
 
-  comments = [Comment(node["id"], node["comment"]) for group in group_dict.values()
+  comments = [Comment(node, tree.nodes[node]["comment"]) for group in group_dict.values()
                   for tree in group
-                  for node in tree if "comment" in node]
+                  for node in tree.nodes if "comment" in tree.nodes[node]]
 
-  branchpoints = [Branchpoint(node["id"], 0) for group in group_dict.values()
+  branchpoints = [Branchpoint(tree.nodes[node]["id"], 0) for group in group_dict.values()
                   for tree in group
-                  for node in tree if "branchpoint_id" in node]
+                  for node in tree.nodes if "branchpoint" in tree.nodes[node]]
 
   groups = [Group(id=group_id, name=group_name, children=[])
             for group_id, group_name in enumerate(group_dict, 1)]
@@ -74,11 +86,12 @@ def generate_nml(group_dict: Union[List[nx.Graph], Dict[str, List[nx.Graph]]], g
     for tree in group_dict[group_name]:
       nodes, edges = extract_nodes_and_edges_from_graph(tree)
       color = tree.graph["color"] if "color" in tree.graph else random_color_rgba()
+      name = tree.graph["name"] if "name" in tree.graph else f"tree{tree.graph['id']}"
 
       trees.append(Tree(nodes=nodes,
                        edges=edges,
                        id=tree.graph["id"],
-                       name=tree.graph["name"],
+                       name=name,
                        groupId=group_id,
                        color=color))
 
@@ -92,32 +105,41 @@ def generate_nml(group_dict: Union[List[nx.Graph], Dict[str, List[nx.Graph]]], g
 
 
 def generate_graph(nml: NML) -> Tuple[Dict[str, List[nx.Graph]], Dict]:
-    graph_dict = {}
+    group_dict = {}
     for group in nml.groups:
         graphs_in_current_group = []
         for tree in nml.trees:
             if tree.groupId == group.id:
                 graphs_in_current_group.append(nml_tree_to_graph(tree))
-        graph_dict[group.name] = graphs_in_current_group
+        group_dict[group.name] = graphs_in_current_group
 
     nml_parameters = nml.parameters
     parameter_dict = {}
 
-    parameter_dict["name"] = nml_parameters.name
-    parameter_dict["scale"] = nml_parameters.scale
-    parameter_dict["offset"] = nml_parameters.offset
-    parameter_dict["time"] = nml_parameters.time
-    parameter_dict["editPosition"] = nml_parameters.editPosition
-    parameter_dict["editRotation"] = nml_parameters.editRotation
-    parameter_dict["zoomLevel"] = nml_parameters.zoomLevel
-    parameter_dict["taskBoundingBox"] = nml_parameters.taskBoundingBox
-    parameter_dict["userBoundingBox"] = nml_parameters.userBoundingBox
+    parameter_list = ["name", "scale", "offset", "time", "editPosition", "editRotation", "zoomLevel",
+                      "taskBoundingBox", "userBoundingBox"]
 
-    return graph_dict, parameter_dict
+    for parameter in parameter_list:
+        if getattr(nml_parameters, parameter) is not None:
+            parameter_dict[parameter] = getattr(nml_parameters, parameter)
+
+    for comment in nml.comments:
+        for group in group_dict.values():
+            for tree in group:
+                if comment.node in tree.nodes:
+                    tree.nodes[comment.node]["comment"] = comment.content
+
+    for branchpoint in nml.branchpoints:
+        for group in group_dict.values():
+            for tree in group:
+                if branchpoint.id in tree.nodes:
+                    tree.nodes[branchpoint.id]["branchpoint"] = branchpoint.time
+
+    return group_dict, parameter_dict
 
 
 def nml_tree_to_graph(tree: Tree) -> nx.Graph:
-    optional_attribute_list = ["rotation", "inVp", "inMag", "bitDepth","interpolation"]
+    optional_attribute_list = ["rotation", "inVp", "inMag", "bitDepth", "interpolation"]
 
     graph = nx.Graph(id= tree.id, color=tree.color, name=tree.name, groupId=tree.groupId)
     for node in tree.nodes:
@@ -131,18 +153,23 @@ def nml_tree_to_graph(tree: Tree) -> nx.Graph:
 
     return graph
 
+def discard_children_hierachy(Groups):
+    groups_without_hierachy = []
+    for group in NML.groups: 
+
+
 
 def extract_nodes_and_edges_from_graph(graph: nx.Graph) -> Tuple[List[Node], List[Edge]]:
-  node_nml = [Node(id=graph.nodes[node_index]["id"],
-                   radius=1.0,
-                   position=graph.node[node_index]["position"],
-                   rotation=graph.node[node_index]["rotation"] if "rotation" in graph.node[node_index] else None,
-                   inVp=graph.node[node_index]["inVp"] if "inVp" in graph.node[node_index] else None,
-                   inMag=graph.node[node_index]["inMag"] if "inMag" in graph.node[node_index] else None,
-                   bitDepth=graph.node[node_index]["bitDepth"] if "bitDepth" in graph.node[node_index] else None,
-                   interpolation=graph.node[node_index]["interpolation"] if "interpolation" in graph.node[node_index] else None)
-                  for node_index in range(len(graph.nodes))]
+  node_nml = [Node(id=graph.nodes[node]["id"],
+                   position=graph.nodes[node]["position"],
+                   radius=graph.nodes[node]["radius"] if "radius" in graph.nodes[node] else None,
+                   rotation=graph.nodes[node]["rotation"] if "rotation" in graph.nodes[node] else None,
+                   inVp=graph.nodes[node]["inVp"] if "inVp" in graph.nodes[node] else None,
+                   inMag=graph.nodes[node]["inMag"] if "inMag" in graph.nodes[node] else None,
+                   bitDepth=graph.nodes[node]["bitDepth"] if "bitDepth" in graph.nodes[node] else None,
+                   interpolation=graph.nodes[node]["interpolation"] if "interpolation" in graph.nodes[node] else None)
+                for node in graph.nodes]
 
-  edge_nml = [Edge(edge[0], edge[1]) for edge in graph.edges]
+  edge_nml = [Edge(source=edge[0], target=edge[1]) for edge in graph.edges]
 
   return node_nml, edge_nml

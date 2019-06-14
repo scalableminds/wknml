@@ -3,7 +3,7 @@ from wknml.nml_generation import generate_graph, generate_nml
 
 # TODO i guess the group-children will not work here...
 def test_generate_nml():
-        nodes = [Node(id=1, radius=2.0, position=[1.0, 2.0, 3.0], rotation=[0.2, 0.2, 0.2], inVp=0,
+        nodes = [Node(id=10, radius=2.0, position=[1.0, 2.0, 3.0], rotation=[0.2, 0.2, 0.2], inVp=0,
                   inMag=1, bitDepth=8, interpolation=True),
                  Node(id=2, radius=2.0, position=[1.0, 2.0, 3.0], rotation=[0.2, 0.2, 0.2],
                       inMag=1, bitDepth=8, interpolation=True),
@@ -18,7 +18,7 @@ def test_generate_nml():
                  Node(id=4, radius=2.0, position=[1.0, 2.0, 3.0], rotation=[0.2, 0.2, 0.2]),
                  ]
 
-        edges = [Edge(1, 2), Edge(3, 1), Edge(2, 3),
+        edges = [Edge(10, 2), Edge(3, 10), Edge(2, 3),
                  Edge(1, 2), Edge(3, 1), Edge(2, 3),
                  Edge(1, 2), Edge(3, 1), Edge(2, 3), Edge(1, 4), Edge(4, 2)]
 
@@ -64,7 +64,6 @@ def test_generate_nml():
                            comments=comments,
                            groups=groups)
 
-        graphs = []
 
         (graph, parameter_dict) = generate_graph(expected_nml)
         test_result_nml = generate_nml(graph)

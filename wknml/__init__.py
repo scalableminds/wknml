@@ -38,8 +38,8 @@ Node = NamedTupleWithDefaults(
   "Node",
   [
     ("id", int),
-    ("radius", float),
     ("position", Vector3),
+    ("radius", Optional[float]),
     ("rotation", Optional[Vector3]),
     ("inVp", Optional[int]),
     ("inMag", Optional[int]),
