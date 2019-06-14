@@ -105,6 +105,7 @@ def generate_nml(group_dict: Union[List[nx.Graph], Dict[str, List[nx.Graph]]], g
 
 
 def generate_graph(nml: NML) -> Tuple[Dict[str, List[nx.Graph]], Dict]:
+    nml.groups = discard_children_hierarchy(nml.groups)
     group_dict = {}
     for group in nml.groups:
         graphs_in_current_group = []
@@ -153,9 +154,13 @@ def nml_tree_to_graph(tree: Tree) -> nx.Graph:
 
     return graph
 
-def discard_children_hierachy(Groups):
-    groups_without_hierachy = []
-    for group in NML.groups: 
+def discard_children_hierarchy(groups: List[Group]) -> List[Group]:
+    groups_without_hierarchy = []
+    for group in groups:
+        children = discard_children_hierarchy(group.children)
+        group.children = []
+        groups_without_hierarchy.extend(children)
+    return groups_without_hierarchy
 
 
 
