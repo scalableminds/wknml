@@ -11,11 +11,21 @@ logger = logging.getLogger(__name__)
 
 
 def random_color_rgba():
-  # https://stackoverflow.com/a/43437435/783758
+    # https://stackoverflow.com/a/43437435/783758
 
-  h, s, l = np.random.random(), 0.5 + np.random.random() / 2.0, 0.4 + np.random.random() / 5.0
-  r, g, b = colorsys.hls_to_rgb(h, l, s)
-  return (r, g, b, 1)
+    h, s, l = np.random.random(), 0.5 + np.random.random() / 2.0, 0.4 + np.random.random() / 5.0
+    r, g, b = colorsys.hls_to_rgb(h, l, s)
+    return (r, g, b, 1)
+
+
+def discard_children_hierarchy(groups: List[Group]) -> List[Group]:
+    groups_without_hierarchy = []
+    for group in groups:
+        children = discard_children_hierarchy(group.children)
+        groups_without_hierarchy.append(Group(id=group.id, name=group.name, children=[]))
+        groups_without_hierarchy.extend(children)
+    return groups_without_hierarchy
+
 
 def globalize_tree_ids(group_dict: Dict[str, List[nx.Graph]]):
     current_id = 1
@@ -58,15 +68,14 @@ def generate_nml(group_dict: Union[List[nx.Graph], Dict[str, List[nx.Graph]]], g
     globalize_node_ids(group_dict)
 
   nmlParameters = NMLParameters(
-    name=parameters["name"] if "name" in parameters else "dataset",
-    scale=parameters["scale"] if "scale" in parameters else [11.24, 11.24, 25],
-    offset=parameters["offset"] if "offset" in parameters else (0, 0, 0),
-    time=parameters["time"] if "time" in parameters else 0,
-    editPosition=parameters["editPosition"] if "editPosition" in parameters else (0, 0, 0),
-    editRotation=parameters["editRotation"] if "editRotation" in parameters else (0, 0, 0),
-    zoomLevel=parameters["zoomLevel"] if "zoomLevel" in parameters else 0,
-    taskBoundingBox=parameters["taskBoundingBox"] if "taskBoundingBox" in parameters else None,
-    userBoundingBox=parameters["userBoundingBox"] if "userBoundingBox" in parameters else None,
+    name=parameters["name"] if "name" in parameters and parameters["name"] else "dataset",
+    scale=parameters["scale"] if "scale" in parameters and parameters["scale"] else [11.24, 11.24, 25],
+    offset=parameters["offset"] if "offset" in parameters and parameters["offset"] else (0, 0, 0),
+    time=parameters["time"] if "time" in parameters and parameters["time"] else 0,
+    editPosition=parameters["editPosition"] if "editPosition" in parameters and parameters["editPosition"] else (0, 0, 0),
+    zoomLevel=parameters["zoomLevel"] if "zoomLevel" in parameters and parameters["zoomLevel"] else 0,
+    taskBoundingBox=parameters["taskBoundingBox"] if "taskBoundingBox" in parameters and parameters["taskBoundingBox"] else None,
+    userBoundingBox=parameters["userBoundingBox"] if "userBoundingBox" in parameters and parameters["userBoundingBox"] else None,
   )
 
   comments = [Comment(node, tree.nodes[node]["comment"]) for group in group_dict.values()
@@ -85,8 +94,8 @@ def generate_nml(group_dict: Union[List[nx.Graph], Dict[str, List[nx.Graph]]], g
   for group_id, group_name in enumerate(group_dict, 1):
     for tree in group_dict[group_name]:
       nodes, edges = extract_nodes_and_edges_from_graph(tree)
-      color = tree.graph["color"] if "color" in tree.graph else random_color_rgba()
-      name = tree.graph["name"] if "name" in tree.graph else f"tree{tree.graph['id']}"
+      color = tree.graph["color"] if "color" in tree.graph and tree.graph["color"] else random_color_rgba()
+      name = tree.graph["name"] if "name" in tree.graph and tree.graph["name"] else f"tree{tree.graph['id']}"
 
       trees.append(Tree(nodes=nodes,
                        edges=edges,
@@ -153,15 +162,6 @@ def nml_tree_to_graph(tree: Tree) -> nx.Graph:
     graph.add_edges_from([(edge.source, edge.target) for edge in tree.edges])
 
     return graph
-
-
-def discard_children_hierarchy(groups: List[Group]) -> List[Group]:
-    groups_without_hierarchy = []
-    for group in groups:
-        children = discard_children_hierarchy(group.children)
-        groups_without_hierarchy.append(Group(id=group.id, name=group.name, children=[]))
-        groups_without_hierarchy.extend(children)
-    return groups_without_hierarchy
 
 
 def extract_nodes_and_edges_from_graph(graph: nx.Graph) -> Tuple[List[Node], List[Edge]]:

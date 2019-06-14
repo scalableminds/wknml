@@ -1,5 +1,6 @@
-from wknml import NMLParameters, Group, Edge, Node, Tree, NML, Branchpoint, Comment, write_nml
+from wknml import NMLParameters, Group, Edge, Node, Tree, NML, Branchpoint, Comment, write_nml, parse_nml
 from wknml.nml_generation import generate_graph, generate_nml
+import xml.etree.ElementTree as ET
 
 # TODO i guess the group-children will not work here...
 def test_generate_nml():
@@ -68,8 +69,15 @@ def test_generate_nml():
         (graph, parameter_dict) = generate_graph(expected_nml)
         test_result_nml = generate_nml(graph)
 
+        with open("./testdata/test.nml", "r") as file:
+            read_nml = parse_nml(file)
+
         with open("./testdata/test.nml", "wb") as file:
             write_nml(file=file, nml=test_result_nml)
+
+        print(test_result_nml.trees[1].nodes[1])
+        print(read_nml.trees[1].nodes[1])
+        assert test_result_nml.trees[1].nodes[1] == test_result_nml.trees[1].nodes[1]
 
         assert test_result_nml == expected_nml
 
