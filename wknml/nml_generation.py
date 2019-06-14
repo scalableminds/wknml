@@ -105,7 +105,7 @@ def generate_nml(group_dict: Union[List[nx.Graph], Dict[str, List[nx.Graph]]], g
 
 
 def generate_graph(nml: NML) -> Tuple[Dict[str, List[nx.Graph]], Dict]:
-    nml.groups = discard_children_hierarchy(nml.groups)
+    nml = nml._replace(groups=discard_children_hierarchy(nml.groups))
     group_dict = {}
     for group in nml.groups:
         graphs_in_current_group = []
@@ -154,14 +154,14 @@ def nml_tree_to_graph(tree: Tree) -> nx.Graph:
 
     return graph
 
+
 def discard_children_hierarchy(groups: List[Group]) -> List[Group]:
     groups_without_hierarchy = []
     for group in groups:
         children = discard_children_hierarchy(group.children)
-        group.children = []
+        groups_without_hierarchy.append(Group(id=group.id, name=group.name, children=[]))
         groups_without_hierarchy.extend(children)
     return groups_without_hierarchy
-
 
 
 def extract_nodes_and_edges_from_graph(graph: nx.Graph) -> Tuple[List[Node], List[Edge]]:
@@ -172,7 +172,8 @@ def extract_nodes_and_edges_from_graph(graph: nx.Graph) -> Tuple[List[Node], Lis
                    inVp=graph.nodes[node]["inVp"] if "inVp" in graph.nodes[node] else None,
                    inMag=graph.nodes[node]["inMag"] if "inMag" in graph.nodes[node] else None,
                    bitDepth=graph.nodes[node]["bitDepth"] if "bitDepth" in graph.nodes[node] else None,
-                   interpolation=graph.nodes[node]["interpolation"] if "interpolation" in graph.nodes[node] else None)
+                   interpolation=graph.nodes[node]["interpolation"] if "interpolation" in graph.nodes[node] else None,
+                   time=graph.nodes[node]["time"] if "time" in graph.nodes[node] else None)
                 for node in graph.nodes]
 
   edge_nml = [Edge(source=edge[0], target=edge[1]) for edge in graph.edges]

@@ -45,8 +45,9 @@ Node = NamedTupleWithDefaults(
     ("inMag", Optional[int]),
     ("bitDepth", Optional[int]),
     ("interpolation", Optional[bool]),
+    ("time", Optional[int]),
   ],
-  (None,) * 6
+  (None,) * 7
 )
 Edge = NamedTuple(
   "Edge",
@@ -172,7 +173,7 @@ def parse_parameters(nml_parameters):
 def parse_node(nml_node):
     return Node(
         id=int(nml_node.get("id")),
-        radius=float(nml_node.get("radius")),
+        radius=float(nml_node.get("radius", default=None)),
         position=(
             float(nml_node.get("x")),
             float(nml_node.get("y")),
@@ -345,11 +346,12 @@ def dump_node(xf, node):
 
     attributes = {
         "id": str(node.id),
-        "radius": str(node.radius),
         "x": str(node.position[0]),
         "y": str(node.position[1]),
         "z": str(node.position[2]),
     }
+
+    attributes["radius"] = str(node.radius) if node.radius else 1.0
 
     if node.rotation is not None:
         attributes["rotX"] = str(node.rotation[0])
