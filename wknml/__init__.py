@@ -319,6 +319,13 @@ def dump_parameters(xf, parameters):
         "z": str(parameters.scale[2]),
     })
 
+    if parameters.offset is not None:
+        xf.tag("offset", {
+            "x": str(parameters.offset[0]),
+            "y": str(parameters.offset[1]),
+            "z": str(parameters.offset[2]),
+        })
+
     if parameters.time is not None:
         xf.tag("time", {"ms": str(parameters.time)})
     if parameters.editPosition is not None:

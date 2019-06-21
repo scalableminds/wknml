@@ -57,42 +57,43 @@ def globalize_node_ids(group_dict: Dict[str, List[nx.Graph]]):
             tree_group[tree_index] = new_tree
 
 
-def generate_nml(group_dict: Union[List[nx.Graph], Dict[str, List[nx.Graph]]], globalize_ids: bool = True, parameters: Dict[str, Any] = {}) -> NML:
+def generate_nml(tree_dict: Union[List[nx.Graph], Dict[str, List[nx.Graph]]], globalize_ids: bool = True, parameters: Dict[str, Any] = {}) -> NML:
 
-  if type(group_dict) is not dict:
-    group_dict = ["main_group", group_dict]
+  if type(tree_dict) is not dict:
+    tree_dict = ["main_group", tree_dict]
 
     # todo ensure graph attributes and globalize tree ids and maybe group ids
   if globalize_ids:
-    globalize_tree_ids(group_dict)
-    globalize_node_ids(group_dict)
+    globalize_tree_ids(tree_dict)
+    globalize_node_ids(tree_dict)
 
   nmlParameters = NMLParameters(
     name=parameters["name"] if "name" in parameters and parameters["name"] else "dataset",
     scale=parameters["scale"] if "scale" in parameters and parameters["scale"] else [11.24, 11.24, 25],
-    offset=parameters["offset"] if "offset" in parameters and parameters["offset"] else (0, 0, 0),
-    time=parameters["time"] if "time" in parameters and parameters["time"] else 0,
-    editPosition=parameters["editPosition"] if "editPosition" in parameters and parameters["editPosition"] else (0, 0, 0),
-    zoomLevel=parameters["zoomLevel"] if "zoomLevel" in parameters and parameters["zoomLevel"] else 0,
+    offset=parameters["offset"] if "offset" in parameters and parameters["offset"] else None,
+    time=parameters["time"] if "time" in parameters and parameters["time"] else None,
+    editPosition=parameters["editPosition"] if "editPosition" in parameters and parameters["editPosition"] else None,
+    editRotation=parameters["editRotation"] if "editRotation" in parameters and parameters["editRotation"] else None,
+    zoomLevel=parameters["zoomLevel"] if "zoomLevel" in parameters and parameters["zoomLevel"] else None,
     taskBoundingBox=parameters["taskBoundingBox"] if "taskBoundingBox" in parameters and parameters["taskBoundingBox"] else None,
     userBoundingBox=parameters["userBoundingBox"] if "userBoundingBox" in parameters and parameters["userBoundingBox"] else None,
   )
 
-  comments = [Comment(node, tree.nodes[node]["comment"]) for group in group_dict.values()
-                  for tree in group
-                  for node in tree.nodes if "comment" in tree.nodes[node]]
+  comments = [Comment(node, tree.nodes[node]["comment"]) for group in tree_dict.values()
+              for tree in group
+              for node in tree.nodes if "comment" in tree.nodes[node]]
 
-  branchpoints = [Branchpoint(tree.nodes[node]["id"], 0) for group in group_dict.values()
+  branchpoints = [Branchpoint(tree.nodes[node]["id"], 0) for group in tree_dict.values()
                   for tree in group
                   for node in tree.nodes if "branchpoint" in tree.nodes[node]]
 
   groups = [Group(id=group_id, name=group_name, children=[])
-            for group_id, group_name in enumerate(group_dict, 1)]
+            for group_id, group_name in enumerate(tree_dict, 1)]
 
   trees = []
 
-  for group_id, group_name in enumerate(group_dict, 1):
-    for tree in group_dict[group_name]:
+  for group_id, group_name in enumerate(tree_dict, 1):
+    for tree in tree_dict[group_name]:
       nodes, edges = extract_nodes_and_edges_from_graph(tree)
       color = tree.graph["color"] if "color" in tree.graph and tree.graph["color"] else random_color_rgba()
       name = tree.graph["name"] if "name" in tree.graph and tree.graph["name"] else f"tree{tree.graph['id']}"

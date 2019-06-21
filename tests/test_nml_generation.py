@@ -1,6 +1,5 @@
 from wknml import NMLParameters, Group, Edge, Node, Tree, NML, Branchpoint, Comment, write_nml, parse_nml
 from wknml.nml_generation import generate_graph, generate_nml
-import xml.etree.ElementTree as ET
 
 # TODO i guess the group-children will not work here...
 def test_generate_nml():
@@ -16,8 +15,7 @@ def test_generate_nml():
                  Node(id=1, radius=2.0, position=[1.0, 2.0, 3.0], rotation=[0.2, 0.2, 0.2]),
                  Node(id=2, radius=2.0, position=[1.0, 2.0, 3.0], rotation=[0.2, 0.2, 0.2]),
                  Node(id=3, radius=2.0, position=[1.0, 2.0, 3.0], rotation=[0.2, 0.2, 0.2]),
-                 Node(id=4, radius=2.0, position=[1.0, 2.0, 3.0], rotation=[0.2, 0.2, 0.2]),
-                 ]
+                 Node(id=4, radius=2.0, position=[1.0, 2.0, 3.0], rotation=[0.2, 0.2, 0.2])]
 
         edges = [Edge(10, 2), Edge(3, 10), Edge(2, 3),
                  Edge(1, 2), Edge(3, 1), Edge(2, 3),
@@ -38,7 +36,7 @@ def test_generate_nml():
                  Tree(nodes=nodes[6:],
                       edges=edges[6:],
                       id=3,
-                      name=None,
+                      name="tree3",
                       groupId=2,
                       color=(0.4, 0.3, 0.8, 1.0))
                  ]
@@ -59,15 +57,24 @@ def test_generate_nml():
                         zoomLevel=100
                       )
 
-        expected_nml = NML(parameters=parameters,
+        nml_with_invalid_ids = NML(parameters=parameters,
                            trees=trees,
                            branchpoints=branchpoints,
                            comments=comments,
                            groups=groups)
 
 
-        (graph, parameter_dict) = generate_graph(expected_nml)
-        test_result_nml = generate_nml(graph)
+        with open("./testdata/nml_with_invalid_ids.nml", "wb") as file:
+            write_nml(file=file, nml=nml_with_invalid_ids)
+
+        with open("./testdata/nml_with_invalid_ids.nml", "r") as file:
+            test_nml = parse_nml(file)
+
+        (graph, parameter_dict) = generate_graph(nml_with_invalid_ids)
+        test_result_nml = generate_nml(tree_dict=graph, parameters=parameter_dict)
+
+        with open("./testdata/test_result.nml", "wb") as file:
+            write_nml(file=file, nml=test_result_nml)
 
         with open("./testdata/test.nml", "r") as file:
             read_nml = parse_nml(file)
@@ -79,7 +86,7 @@ def test_generate_nml():
         print(read_nml.trees[1].nodes[1])
         assert test_result_nml.trees[1].nodes[1] == test_result_nml.trees[1].nodes[1]
 
-        assert test_result_nml == expected_nml
+        assert test_result_nml == nml_with_invalid_ids
 
 
 if __name__ == "__main__":
