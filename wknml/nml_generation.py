@@ -166,17 +166,17 @@ def nml_tree_to_graph(tree: Tree) -> nx.Graph:
 
 
 def extract_nodes_and_edges_from_graph(graph: nx.Graph) -> Tuple[List[Node], List[Edge]]:
-  node_nml = [Node(id=graph.nodes[node]["id"],
+    node_nml = [Node(id=graph.nodes[node]["id"],
                    position=graph.nodes[node]["position"],
-                   radius=graph.nodes[node]["radius"] if "radius" in graph.nodes[node] else None,
+                   radius=graph.nodes[node]["radius"] if "radius" in graph.nodes[node] else 1.0,
                    rotation=graph.nodes[node]["rotation"] if "rotation" in graph.nodes[node] else None,
                    inVp=graph.nodes[node]["inVp"] if "inVp" in graph.nodes[node] else None,
                    inMag=graph.nodes[node]["inMag"] if "inMag" in graph.nodes[node] else None,
                    bitDepth=graph.nodes[node]["bitDepth"] if "bitDepth" in graph.nodes[node] else None,
                    interpolation=graph.nodes[node]["interpolation"] if "interpolation" in graph.nodes[node] else None,
-                   time=graph.nodes[node]["time"] if "time" in graph.nodes[node] else None)
+                   time=graph.nodes[node]["time"] if "time" in graph.nodes[node] else 0)
                 for node in graph.nodes]
 
-  edge_nml = [Edge(source=edge[0], target=edge[1]) for edge in graph.edges]
+    edge_nml = [Edge(source=edge[0], target=edge[1]) for edge in graph.edges]
 
-  return node_nml, edge_nml
+    return node_nml, edge_nml
