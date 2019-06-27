@@ -1,7 +1,7 @@
 version: 2
 jobs:
   build_test:
-    working_directory: ~/circleci-wknml
+    working_directory: ~/wknml
     docker:
       - image: circleci/python:3.6.4
         environment:
@@ -21,7 +21,7 @@ jobs:
           name: Python tests
           command: |
             mkdir -p testoutput
-            pipenv run pytest tests/
+            pipenv run pytest tests/test_snapshot_readandwrite.py
 
 workflows:
   version: 2

@@ -33,14 +33,8 @@ def test_snapshot_read_and_compare_nml():
     for i in range(0, len(INPUT_FILES)):
         input_file = INPUT_FILES[i]
         snapshot_file = SNAPSHOT_FILES[i]
-        output_file = SNAPSHOT_FILES[i]
+        output_file = OUTPUT_FILES[i]
         parsed = wknml.parse_nml(input_file)
         with open(output_file, 'wb') as f:
             wknml.write_nml(f, parsed)
         assert filecmp.cmp(snapshot_file + '.snapshot', output_file)
-
-
-
-
-
-
