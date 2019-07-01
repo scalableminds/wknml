@@ -24,8 +24,8 @@
   <thing color.a="1.0" color.b="0.8" color.g="0.3" color.r="0.4" groupId="2" id="2" name="tree2">
     <nodes>
       <node id="1" interpolation="True" radius="2.0" rotX="0.2" rotY="0.2" rotZ="0.2" x="1.0" y="2.0" z="3.0" />
-      <node id="2" radius="2.0" rotX="0.2" rotY="0.2" rotZ="0.2" x="1.0" y="2.0" z="3.0" />
-      <node id="3" radius="2.0" rotX="0.2" rotY="0.2" rotZ="0.2" x="1.0" y="2.0" z="3.0" />
+      <node id="2" radius="2.0" x="1.0" y="2.0" z="3.0" />
+      <node id="3" radius="2.0" x="1.0" y="2.0" z="3.0" />
     </nodes>
     <edges>
       <edge source="1" target="2" />
@@ -35,10 +35,10 @@
   </thing>
   <thing color.a="1.0" color.b="0.8" color.g="0.3" color.r="0.4" groupId="2" id="3" name="tree3">
     <nodes>
-      <node id="1" radius="2.0" rotX="0.2" rotY="0.2" rotZ="0.2" x="1.0" y="2.0" z="3.0" />
-      <node id="2" radius="2.0" rotX="0.2" rotY="0.2" rotZ="0.2" x="1.0" y="2.0" z="3.0" />
-      <node id="3" radius="2.0" rotX="0.2" rotY="0.2" rotZ="0.2" x="1.0" y="2.0" z="3.0" />
-      <node id="4" radius="2.0" rotX="0.2" rotY="0.2" rotZ="0.2" x="1.0" y="2.0" z="3.0" />
+      <node id="1" radius="2.0" x="1.0" y="2.0" z="3.0" />
+      <node id="2" radius="2.0" x="1.0" y="2.0" z="3.0" />
+      <node id="3" radius="2.0" x="1.0" y="2.0" z="3.0" />
+      <node id="4" radius="2.0" x="1.0" y="2.0" z="3.0" />
     </nodes>
     <edges>
       <edge source="1" target="2" />

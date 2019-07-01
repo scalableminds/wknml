@@ -11,9 +11,9 @@
   </parameters>
   <thing color.a="1.0" color.b="0.8" color.g="0.3" color.r="0.4" groupId="1" id="1" name="tree1">
     <nodes>
-      <node bitDepth="8" id="1" inMag="1" inVp="0" interpolation="True" radius="2.0" rotX="0.2" rotY="0.2" rotZ="0.2" time="0" x="1.0" y="2.0" z="3.0" />
-      <node bitDepth="8" id="2" inMag="1" interpolation="True" radius="2.0" rotX="0.2" rotY="0.2" rotZ="0.2" time="0" x="1.0" y="2.0" z="3.0" />
-      <node bitDepth="8" id="3" interpolation="True" radius="2.0" rotX="0.2" rotY="0.2" rotZ="0.2" time="0" x="1.0" y="2.0" z="3.0" />
+      <node bitDepth="8" id="1" inMag="1" inVp="0" interpolation="True" radius="2.0" rotX="0.2" rotY="0.2" rotZ="0.2" x="1.0" y="2.0" z="3.0" />
+      <node bitDepth="8" id="2" inMag="1" interpolation="True" radius="2.0" rotX="0.2" rotY="0.2" rotZ="0.2" x="1.0" y="2.0" z="3.0" />
+      <node bitDepth="8" id="3" interpolation="True" radius="2.0" rotX="0.2" rotY="0.2" rotZ="0.2" x="1.0" y="2.0" z="3.0" />
     </nodes>
     <edges>
       <edge source="1" target="2" />
@@ -23,9 +23,9 @@
   </thing>
   <thing color.a="1.0" color.b="0.8" color.g="0.3" color.r="0.4" groupId="2" id="2" name="tree2">
     <nodes>
-      <node id="4" interpolation="True" radius="2.0" rotX="0.2" rotY="0.2" rotZ="0.2" time="0" x="1.0" y="2.0" z="3.0" />
-      <node id="5" radius="2.0" rotX="0.2" rotY="0.2" rotZ="0.2" time="0" x="1.0" y="2.0" z="3.0" />
-      <node id="6" radius="2.0" rotX="0.2" rotY="0.2" rotZ="0.2" time="0" x="1.0" y="2.0" z="3.0" />
+      <node id="4" interpolation="True" radius="2.0" rotX="0.2" rotY="0.2" rotZ="0.2" x="1.0" y="2.0" z="3.0" />
+      <node id="5" radius="2.0" x="1.0" y="2.0" z="3.0" />
+      <node id="6" radius="2.0" x="1.0" y="2.0" z="3.0" />
     </nodes>
     <edges>
       <edge source="4" target="5" />
@@ -35,10 +35,10 @@
   </thing>
   <thing color.a="1.0" color.b="0.8" color.g="0.3" color.r="0.4" groupId="2" id="3" name="tree3">
     <nodes>
-      <node id="7" radius="2.0" rotX="0.2" rotY="0.2" rotZ="0.2" time="0" x="1.0" y="2.0" z="3.0" />
-      <node id="8" radius="2.0" rotX="0.2" rotY="0.2" rotZ="0.2" time="0" x="1.0" y="2.0" z="3.0" />
-      <node id="9" radius="2.0" rotX="0.2" rotY="0.2" rotZ="0.2" time="0" x="1.0" y="2.0" z="3.0" />
-      <node id="10" radius="2.0" rotX="0.2" rotY="0.2" rotZ="0.2" time="0" x="1.0" y="2.0" z="3.0" />
+      <node id="7" radius="2.0" x="1.0" y="2.0" z="3.0" />
+      <node id="8" radius="2.0" x="1.0" y="2.0" z="3.0" />
+      <node id="9" radius="2.0" x="1.0" y="2.0" z="3.0" />
+      <node id="10" radius="2.0" x="1.0" y="2.0" z="3.0" />
     </nodes>
     <edges>
       <edge source="7" target="8" />

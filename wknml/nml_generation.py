@@ -5,6 +5,7 @@ import numpy as np
 import logging
 import colorsys
 from typing import Tuple, List, Dict, Union, Any
+from copy import deepcopy
 
 
 logger = logging.getLogger(__name__)
@@ -59,24 +60,25 @@ def globalize_node_ids(group_dict: Dict[str, List[nx.Graph]]):
 
 def generate_nml(tree_dict: Union[List[nx.Graph], Dict[str, List[nx.Graph]]], globalize_ids: bool = True, parameters: Dict[str, Any] = {}) -> NML:
 
+  no_group_provided = False
   if type(tree_dict) is not dict:
-    tree_dict = ["main_group", tree_dict]
+    tree_dict = {"main_group": tree_dict}
+    no_group_provided = True
 
-    # todo ensure graph attributes and globalize tree ids and maybe group ids
   if globalize_ids:
     globalize_tree_ids(tree_dict)
     globalize_node_ids(tree_dict)
 
   nmlParameters = NMLParameters(
-    name=parameters["name"] if "name" in parameters and parameters["name"] else "dataset",
-    scale=parameters["scale"] if "scale" in parameters and parameters["scale"] else [11.24, 11.24, 25],
-    offset=parameters["offset"] if "offset" in parameters and parameters["offset"] else None,
-    time=parameters["time"] if "time" in parameters and parameters["time"] else None,
-    editPosition=parameters["editPosition"] if "editPosition" in parameters and parameters["editPosition"] else None,
-    editRotation=parameters["editRotation"] if "editRotation" in parameters and parameters["editRotation"] else None,
-    zoomLevel=parameters["zoomLevel"] if "zoomLevel" in parameters and parameters["zoomLevel"] else None,
-    taskBoundingBox=parameters["taskBoundingBox"] if "taskBoundingBox" in parameters and parameters["taskBoundingBox"] else None,
-    userBoundingBox=parameters["userBoundingBox"] if "userBoundingBox" in parameters and parameters["userBoundingBox"] else None,
+    name=parameters.get("name", "dataset"),
+    scale=parameters.get("scale", [11.24, 11.24, 25]),
+    offset=parameters.get("offset", None),
+    time=parameters.get("time", None),
+    editPosition=parameters.get("editPosition", None),
+    editRotation=parameters.get("editRotation", None),
+    zoomLevel=parameters.get("zoomLevel", None),
+    taskBoundingBox=parameters.get("taskBoundingBox", None),
+    userBoundingBox=parameters.get("userBoundingBox", None),
   )
 
   comments = [Comment(node, tree.nodes[node]["comment"]) for group in tree_dict.values()
@@ -87,7 +89,10 @@ def generate_nml(tree_dict: Union[List[nx.Graph], Dict[str, List[nx.Graph]]], gl
                   for tree in group
                   for node in tree.nodes if "branchpoint" in tree.nodes[node]]
 
-  groups = [Group(id=group_id, name=group_name, children=[])
+  if no_group_provided:
+      groups = []
+  else:
+      groups = [Group(id=group_id, name=group_name, children=[])
             for group_id, group_name in enumerate(tree_dict, 1)]
 
   trees = []
@@ -95,14 +100,14 @@ def generate_nml(tree_dict: Union[List[nx.Graph], Dict[str, List[nx.Graph]]], gl
   for group_id, group_name in enumerate(tree_dict, 1):
     for tree in tree_dict[group_name]:
       nodes, edges = extract_nodes_and_edges_from_graph(tree)
-      color = tree.graph["color"] if "color" in tree.graph and tree.graph["color"] else random_color_rgba()
-      name = tree.graph["name"] if "name" in tree.graph and tree.graph["name"] else f"tree{tree.graph['id']}"
+      color = tree.graph.get("color", random_color_rgba())
+      name = tree.graph.get("name", f"tree{tree.graph['id']}")
 
       trees.append(Tree(nodes=nodes,
                        edges=edges,
                        id=tree.graph["id"],
                        name=name,
-                       groupId=group_id,
+                       groupId= None if no_group_provided else group_id,
                        color=color))
 
   nml = NML(parameters=nmlParameters,
@@ -115,7 +120,7 @@ def generate_nml(tree_dict: Union[List[nx.Graph], Dict[str, List[nx.Graph]]], gl
 
 
 def generate_graph(nml: NML) -> Tuple[Dict[str, List[nx.Graph]], Dict]:
-    nml = nml._replace(groups=discard_children_hierarchy(nml.groups))
+    nml = deepcopy(nml)._replace(groups=discard_children_hierarchy(nml.groups))
     group_dict = {}
     for group in nml.groups:
         graphs_in_current_group = []
@@ -167,14 +172,14 @@ def nml_tree_to_graph(tree: Tree) -> nx.Graph:
 
 def extract_nodes_and_edges_from_graph(graph: nx.Graph) -> Tuple[List[Node], List[Edge]]:
     node_nml = [Node(id=graph.nodes[node]["id"],
-                   position=graph.nodes[node]["position"],
-                   radius=graph.nodes[node]["radius"] if "radius" in graph.nodes[node] else 1.0,
-                   rotation=graph.nodes[node]["rotation"] if "rotation" in graph.nodes[node] else None,
-                   inVp=graph.nodes[node]["inVp"] if "inVp" in graph.nodes[node] else None,
-                   inMag=graph.nodes[node]["inMag"] if "inMag" in graph.nodes[node] else None,
-                   bitDepth=graph.nodes[node]["bitDepth"] if "bitDepth" in graph.nodes[node] else None,
-                   interpolation=graph.nodes[node]["interpolation"] if "interpolation" in graph.nodes[node] else None,
-                   time=graph.nodes[node]["time"] if "time" in graph.nodes[node] else 0)
+                     position=graph.nodes[node]["position"],
+                     radius=graph.nodes[node].get("radius", 1.0),
+                     rotation=graph.nodes[node].get("rotation", None),
+                     inVp=graph.nodes[node].get("inVp", None),
+                     inMag=graph.nodes[node].get("inMag", None),
+                     bitDepth=graph.nodes[node].get("bitDepth", None),
+                     interpolation=graph.nodes[node].get("interpolation", None),
+                     time=graph.nodes[node].get("time", None))
                 for node in graph.nodes]
 
     edge_nml = [Edge(source=edge[0], target=edge[1]) for edge in graph.edges]

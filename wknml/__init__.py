@@ -295,6 +295,7 @@ def parse_nml(file):
         groups=root_group.children,
     )
 
+
 def dump_bounding_box(xf, parameters, prefix):
     bboxName = prefix + "BoundingBox"
     parametersBox = getattr(parameters, bboxName)
@@ -446,133 +447,7 @@ def dump_nml(xf, nml: NML):
     xf.endTag() # groups
     xf.endTag() # things
 
+
 def write_nml(file, nml: NML):
     with XmlWriter(file) as xf:
         dump_nml(xf, nml)
-
-
-def compare_parameters(parameters1: NMLParameters, parameters2: NMLParameters) -> bool:
-    if parameters1.name != parameters2.name:
-        return False
-    if parameters1.scale != parameters2.scale:
-        return False
-    if parameters1.offset != parameters2.offset:
-        return False
-    if parameters1.time != parameters2.time:
-        return False
-    if parameters1.editPosition != parameters2.editPosition:
-        return False
-    if parameters1.editRotation != parameters2.editRotation:
-        return False
-    if parameters1.zoomLevel != parameters2.zoomLevel:
-        return False
-    if parameters1.taskBoundingBox != parameters2.taskBoundingBox:
-        return False
-    if parameters1.userBoundingBox != parameters2.userBoundingBox:
-        return False
-    return True
-
-
-def compare_nodes(nodes1: List[Node], nodes2: List[Node]) -> bool:
-    if len(nodes1) != len(nodes2):
-        return False
-    for i in range(len(nodes1)):
-        if nodes1[i].id != nodes2[i].id:
-            return False
-        if nodes1[i].position != nodes2[i].position:
-            return False
-        if nodes1[i].radius != nodes2[i].radius:
-            return False
-        if nodes1[i].rotation != nodes2[i].rotation:
-            return False
-        if nodes1[i].inVp != nodes2[i].inVp:
-            return False
-        if nodes1[i].inMag != nodes2[i].inMag:
-            return False
-        if nodes1[i].bitDepth != nodes2[i].bitDepth:
-            return False
-        if nodes1[i].interpolation != nodes2[i].interpolation:
-            return False
-        if nodes1[i].time != nodes2[i].time:
-            return False
-    return True
-
-
-def compare_edges(edges1: List[Edge], edges2: List[Edge]) -> bool:
-    if len(edges1) != len(edges2):
-        return False
-    for i in range(len(edges1)):
-        if edges1[i].source != edges2[i].source:
-            return False
-        if edges1[i].target != edges2[i].target:
-            return False
-    return True
-
-
-def compare_trees(trees1: List[Tree], trees2: List[Tree]) -> bool:
-    if len(trees1) != len(trees2):
-        return False
-    for i in range(len(trees1)):
-
-        if trees1[i].id != trees2[i].id:
-            return False
-        if trees1[i].color != trees2[i].color:
-            return False
-        if trees1[i].name != trees2[i].name:
-            return False
-        if trees1[i].groupId != trees2[i].groupId:
-            return False
-        if not compare_nodes(trees1[i].nodes, trees2[i].nodes):
-            return False
-        if not compare_edges(trees1[i].edges, trees2[i].edges):
-            return False
-    return True
-
-
-def compare_branchpoints(branchpoints1: List[Branchpoint], branchpoints2: List[Branchpoint]) -> bool:
-    if len(branchpoints1) != len(branchpoints2):
-        return False
-    for i in range(len(branchpoints1)):
-        if branchpoints1[i].id != branchpoints2[i].id:
-            return False
-        if branchpoints1[i].time != branchpoints2[i].time:
-            return False
-    return True
-
-
-def compare_comments(comments1: List[Comment], comments2: List[Comment]) -> bool:
-    if len(comments1) != len(comments2):
-        return False
-    for i in range(len(comments1)):
-        if comments1[i].node != comments2[i].node:
-            return False
-        if comments1[i].content != comments2[i].content:
-            return False
-    return True
-
-
-def compare_groups(groups1: List[Group], groups2: List[Group]) -> bool:
-    if len(groups1) != len(groups2):
-        return False
-    for i in range(len(groups1)):
-        if groups1[i].id != groups2[i].id:
-            return False
-        if groups1[i].name != groups2[i].name:
-            return False
-        if not compare_groups(groups1[i].children, groups1[i].children):
-            return False
-    return True
-
-
-def compare_nml(nml1: NML, nml2: NML) -> bool:
-    if not compare_parameters(nml1.parameters, nml2.parameters):
-        return False
-    if not compare_trees(nml1.trees, nml2.trees):
-        return False
-    if not compare_branchpoints(nml1.branchpoints, nml2.branchpoints):
-        return False
-    if not compare_comments(nml1.comments, nml2.comments):
-        return False
-    if not compare_groups(nml1.groups, nml2.groups):
-        return False
-    return True
