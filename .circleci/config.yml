@@ -1,0 +1,30 @@
+version: 2
+jobs:
+  build_test:
+    working_directory: ~/wknml
+    docker:
+      - image: circleci/python:3.6.4
+        environment:
+          PIPENV_VENV_IN_PROJECT: true
+
+    steps:
+      - checkout
+
+      - run:
+          name: Install tools
+          command: |
+            sudo pip install pipenv
+            pipenv install pytest --dev
+            pipenv install
+
+      - run:
+          name: Python tests
+          command: |
+            mkdir -p testoutput
+            pipenv run pytest tests/test_snapshot_readandwrite.py
+
+workflows:
+  version: 2
+  default:
+    jobs:
+      - build_test

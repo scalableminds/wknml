@@ -2,6 +2,7 @@ import xml.etree.ElementTree as ET
 from loxun import XmlWriter
 from typing import NamedTuple, List, Tuple, Optional
 import collections
+import numbers
 
 Vector3 = Tuple[float, float, float]
 Vector4 = Tuple[float, float, float, float]
@@ -218,7 +219,10 @@ def parse_tree(nml_tree):
             float(nml_tree.get("colorb")),
             float(nml_tree.get("colora")),
         )
-    groupId = int(nml_tree.get("groupId", default=-1))
+    try:
+        groupId = int(nml_tree.get("groupId", default=-1))
+    except ValueError:
+        groupId = -1
 
     return Tree(
         nodes=[],
