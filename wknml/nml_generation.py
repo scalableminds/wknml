@@ -43,11 +43,10 @@ def globalize_node_ids(group_dict: Dict[str, List[nx.Graph]]):
             tree = tree_group[tree_index]
             new_tree = nx.Graph(**tree.graph)
             edge_mapping_dict = {}
-            for node in tree.node:
-                old_id = tree.nodes[node]["id"]
-                tree.nodes[node]["id"] = current_id
+            for old_id in tree.nodes:
+                tree.nodes[old_id]["id"] = current_id
                 edge_mapping_dict[old_id] = current_id
-                new_tree.add_node(current_id, **tree.nodes[node])
+                new_tree.add_node(current_id, **tree.nodes[old_id])
 
                 current_id += 1
             new_edges = []
@@ -58,16 +57,15 @@ def globalize_node_ids(group_dict: Dict[str, List[nx.Graph]]):
             tree_group[tree_index] = new_tree
 
 
-def generate_nml(tree_dict: Union[List[nx.Graph], Dict[str, List[nx.Graph]]], globalize_ids: bool = True, parameters: Dict[str, Any] = {}) -> NML:
+def generate_nml(tree_dict: Union[List[nx.Graph], Dict[str, List[nx.Graph]]], parameters: Dict[str, Any] = {}) -> NML:
 
   no_group_provided = False
   if type(tree_dict) is not dict:
     tree_dict = {"main_group": tree_dict}
     no_group_provided = True
 
-  if globalize_ids:
-    globalize_tree_ids(tree_dict)
-    globalize_node_ids(tree_dict)
+  globalize_tree_ids(tree_dict)
+  globalize_node_ids(tree_dict)
 
   nmlParameters = NMLParameters(
     name=parameters.get("name", "dataset"),
