@@ -39,8 +39,8 @@ Node = NamedTupleWithDefaults(
   "Node",
   [
     ("id", int),
-    ("radius", float),
     ("position", Vector3),
+    ("radius", Optional[float]),
     ("rotation", Optional[Vector3]),
     ("inVp", Optional[int]),
     ("inMag", Optional[int]),
@@ -48,7 +48,7 @@ Node = NamedTupleWithDefaults(
     ("interpolation", Optional[bool]),
     ("time", Optional[int]),
   ],
-  (None,) * 6
+  (None,) * 7
 )
 Edge = NamedTuple(
   "Edge",
@@ -174,7 +174,7 @@ def parse_parameters(nml_parameters):
 def parse_node(nml_node):
     return Node(
         id=int(nml_node.get("id")),
-        radius=float(nml_node.get("radius")),
+        radius=float(nml_node.get("radius", default=None)),
         position=(
             float(nml_node.get("x")),
             float(nml_node.get("y")),
@@ -299,6 +299,7 @@ def parse_nml(file):
         groups=root_group.children,
     )
 
+
 def dump_bounding_box(xf, parameters, prefix):
     bboxName = prefix + "BoundingBox"
     parametersBox = getattr(parameters, bboxName)
@@ -322,6 +323,13 @@ def dump_parameters(xf, parameters):
         "y": str(parameters.scale[1]),
         "z": str(parameters.scale[2]),
     })
+
+    if parameters.offset is not None:
+        xf.tag("offset", {
+            "x": str(parameters.offset[0]),
+            "y": str(parameters.offset[1]),
+            "z": str(parameters.offset[2]),
+        })
 
     if parameters.time is not None:
         xf.tag("time", {"ms": str(parameters.time)})
@@ -350,11 +358,12 @@ def dump_node(xf, node):
 
     attributes = {
         "id": str(node.id),
-        "radius": str(node.radius),
         "x": str(node.position[0]),
         "y": str(node.position[1]),
         "z": str(node.position[2]),
     }
+
+    attributes["radius"] = str(node.radius) if node.radius else 1.0
 
     if node.rotation is not None:
         attributes["rotX"] = str(node.rotation[0])
@@ -442,7 +451,7 @@ def dump_nml(xf, nml: NML):
     xf.endTag() # groups
     xf.endTag() # things
 
+
 def write_nml(file, nml: NML):
     with XmlWriter(file) as xf:
         dump_nml(xf, nml)
-

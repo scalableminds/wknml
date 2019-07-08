@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<things>
+  <parameters>
+    <experiment name="test_dataset" />
+    <scale x="11" y="11" z="25" />
+    <offset x="1" y="1" z="1" />
+    <time ms="1337" />
+    <editPosition x="3" y="6" z="0" />
+    <editRotation xRot="4" yRot="2" zRot="0" />
+    <zoomLevel zoom="100" />
+  </parameters>
+  <thing color.a="1.0" color.b="0.8" color.g="0.3" color.r="0.4" groupId="1" id="1" name="tree1">
+    <nodes>
+      <node bitDepth="8" id="10" inMag="1" inVp="0" interpolation="True" radius="2.0" rotX="0.2" rotY="0.2" rotZ="0.2" x="1.0" y="2.0" z="3.0" />
+      <node bitDepth="8" id="2" inMag="1" interpolation="True" radius="2.0" rotX="0.2" rotY="0.2" rotZ="0.2" x="1.0" y="2.0" z="3.0" />
+      <node bitDepth="8" id="3" interpolation="True" radius="2.0" rotX="0.2" rotY="0.2" rotZ="0.2" x="1.0" y="2.0" z="3.0" />
+    </nodes>
+    <edges>
+      <edge source="10" target="2" />
+      <edge source="3" target="10" />
+      <edge source="2" target="3" />
+    </edges>
+  </thing>
+  <thing color.a="1.0" color.b="0.8" color.g="0.3" color.r="0.4" groupId="2" id="2" name="tree2">
+    <nodes>
+      <node id="1" interpolation="True" radius="2.0" rotX="0.2" rotY="0.2" rotZ="0.2" x="1.0" y="2.0" z="3.0" />
+      <node id="2" radius="2.0" x="1.0" y="2.0" z="3.0" />
+      <node id="3" radius="2.0" x="1.0" y="2.0" z="3.0" />
+    </nodes>
+    <edges>
+      <edge source="1" target="2" />
+      <edge source="3" target="1" />
+      <edge source="2" target="3" />
+    </edges>
+  </thing>
+  <thing color.a="1.0" color.b="0.8" color.g="0.3" color.r="0.4" groupId="2" id="3" name="tree3">
+    <nodes>
+      <node id="1" radius="2.0" x="1.0" y="2.0" z="3.0" />
+      <node id="2" radius="2.0" x="1.0" y="2.0" z="3.0" />
+      <node id="3" radius="2.0" x="1.0" y="2.0" z="3.0" />
+      <node id="4" radius="2.0" x="1.0" y="2.0" z="3.0" />
+    </nodes>
+    <edges>
+      <edge source="1" target="2" />
+      <edge source="3" target="1" />
+      <edge source="2" target="3" />
+      <edge source="1" target="4" />
+      <edge source="4" target="2" />
+    </edges>
+  </thing>
+  <branchpoints>
+    <branchpoint id="1" time="129" />
+    <branchpoint id="2" time="42" />
+    <branchpoint id="4" time="1337" />
+  </branchpoints>
+  <comments>
+    <comment content="test" node="1" />
+    <comment content="hax0r" node="2" />
+    <comment content="admin admin" node="4" />
+  </comments>
+  <groups>
+    <group id="1" name="group1">
+      <group id="2" name="group2" />
+    </group>
+  </groups>
+</things>
