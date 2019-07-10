@@ -3,6 +3,7 @@
   <parameters>
     <experiment name="google-ffn" />
     <scale x="11.239999771118164" y="11.239999771118164" z="11.239999771118164" />
+    <offset x="0.0" y="0.0" z="0.0" />
     <time ms="1558533850361" />
     <editPosition x="153.0" y="93.0" z="233.0" />
     <editRotation xRot="359.4796676877494" yRot="12.702780323279" zRot="54.24080096414724" />
