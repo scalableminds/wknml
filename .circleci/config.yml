@@ -21,7 +21,7 @@ jobs:
           name: Python tests
           command: |
             mkdir -p testoutput
-            pipenv run pytest tests/test_snapshot_readandwrite.py
+            pipenv run pytest tests
 
 workflows:
   version: 2
