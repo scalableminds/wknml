@@ -3,7 +3,8 @@ from setuptools import setup, find_packages
 setup(
     name="wknml",
     packages=find_packages(exclude=("tests",)),
-    version="0.0.6",
+    use_scm_version=True,
+    setup_requires=['setuptools_scm'],
     install_requires=["loxun"],
     description="An NML library for webKnossos",
     author="Norman Rzepka",

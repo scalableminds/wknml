@@ -23,8 +23,27 @@ jobs:
             mkdir -p testoutput
             pipenv run pytest tests
 
+      - run:
+          name: Publish python package
+          command: |
+            if [ -n "$CIRCLE_TAG" ]; then
+              echo "[distutils]" >> ~/.pypirc
+              echo "index-servers = pypi" >> ~/.pypirc
+              echo "[pypi]" >> ~/.pypirc
+              echo "repository=https://upload.pypi.org/legacy/" >> ~/.pypirc
+              echo "username=$PYPI_USERNAME" >> ~/.pypirc
+              echo "password=$PYPI_PASSWORD" >> ~/.pypirc
+
+              python setup.py sdist upload
+            else
+              echo "Skipping publishing on non-tag"
+            fi
+
 workflows:
   version: 2
   default:
     jobs:
-      - build_test
+      - build_test:
+          filters:
+            tags:
+              only: /.*/
