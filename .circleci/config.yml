@@ -26,7 +26,7 @@ jobs:
       - run:
           name: Publish python package
           command: |
-            if [ -n "$CIRCLE_TAG" ]; then
+            # if [ -n "$CIRCLE_TAG" ]; then
               echo "[distutils]" >> ~/.pypirc
               echo "index-servers = pypi" >> ~/.pypirc
               echo "[pypi]" >> ~/.pypirc
@@ -35,9 +35,9 @@ jobs:
               echo "password=$PYPI_PASSWORD" >> ~/.pypirc
 
               python setup.py sdist upload
-            else
-              echo "Skipping publishing on non-tag"
-            fi
+            # else
+            #   echo "Skipping publishing on non-tag"
+            # fi
 
 workflows:
   version: 2
