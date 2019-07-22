@@ -23,6 +23,18 @@ jobs:
             mkdir -p testoutput
             pipenv run pytest tests
 
+      - run:
+          name: Publish python package
+          command: |
+            echo "[distutils]" >> ~/.pypirc
+            echo "index-servers = pypi" >> ~/.pypirc
+            echo "[pypi]" >> ~/.pypirc
+            echo "repository=https://upload.pypi.org/legacy/" >> ~/.pypirc
+            echo "username=$PYPI_USERNAME" >> ~/.pypirc
+            echo "password=$PYPI_PASSWORD" >> ~/.pypirc
+
+            python setup.py sdist upload
+
 workflows:
   version: 2
   default:
