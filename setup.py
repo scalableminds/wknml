@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="wknml",
-    packages=find_packages(exclude=("tests",)),
+    packages=find_packages(exclude=("tests","examples")),
     use_scm_version=True,
     setup_requires=['setuptools_scm'],
     install_requires=["loxun"],
