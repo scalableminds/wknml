@@ -1,5 +1,6 @@
 from typing import Union, Dict, List
 from math import sqrt, ceil
+from copy import deepcopy
 import networkx as nx
 import numpy as np
 
@@ -23,40 +24,47 @@ def ensure_max_edge_length(nml_or_graph: Union[NML, nx.Graph], max_length: int) 
     if isinstance(nml_or_graph, nx.Graph):
         return nml_graph
     else:
-        return generate_nml(nml_graph, parameter_dict)
-
+        return generate_nml(nml_graph, parameter_dict, globalize=False)
 
 
 def calculate_distance_between_nodes(node1: Dict, node2: Dict) -> float:
-    return sqrt((node1['x'] - node2['x']) ** 2 +
-                (node1['y'] - node2['y']) ** 2 +
-                (node1['z'] - node2['z']) ** 2)
+    node1_position = node1['position']
+    node2_position = node2['position']
+    return sqrt((node1_position[0] - node2_position[0]) ** 2 +
+                (node1_position[1] - node2_position[1]) ** 2 +
+                (node1_position[2] - node2_position[2]) ** 2)
 
 
 def get_vector_between_nodes(node1: Dict, node2: Dict) -> List[int]:
-    return [node2['x'] - node1['x'],
-            node2['y'] - node1['y'],
-            node2['z'] - node1['z']]
+    node1_position = node1['position']
+    node2_position = node2['position']
+    return [node2_position[0] - node1_position[0],
+            node2_position[1] - node1_position[1],
+            node2_position[2] - node1_position[2]]
 
 
 def get_padding_node_position(node1: Dict, node2: Dict, relative_distance_along_vector: float) -> List[int]:
+    node1_position = node1['position']
     vector_between_nodes = get_vector_between_nodes(node1, node2)
-    return [node1['x'] + vector_between_nodes[0] * relative_distance_along_vector,
-            node1['y'] + vector_between_nodes[1] * relative_distance_along_vector,
-            node1['z'] + vector_between_nodes[2] * relative_distance_along_vector]
+    return [node1_position[0] + vector_between_nodes[0] * relative_distance_along_vector,
+            node1_position[1] + vector_between_nodes[1] * relative_distance_along_vector,
+            node1_position[2] + vector_between_nodes[2] * relative_distance_along_vector]
 
 
 def detect_max_node_id_from_all_graphs(graph_dict: Dict[str, nx.Graph]) -> int:
     max_id = None
     for group in graph_dict.values():
         for tree in group:
-            max_id_f_current_tree = np.array(list(tree.nodes)).max()
-            max_id = max_id_f_current_tree if max_id_f_current_tree > max_id or not max_id else max_id
+            max_id_of_current_tree = np.array(list(tree.nodes)).max()
+            max_id = max_id_of_current_tree if not max_id or max_id_of_current_tree > max_id else max_id
 
     return max_id
 
 
 def ensure_max_edge_length_in_tree(graph: nx.Graph, max_length: int, current_id: int) -> int:
+    edges_to_be_added = []
+    edges_to_be_removed = []
+    nodes_to_be_added = []
     for edge in graph.edges:
         node1 = graph.nodes[edge[0]]
         node2 = graph.nodes[edge[1]]
@@ -65,27 +73,32 @@ def ensure_max_edge_length_in_tree(graph: nx.Graph, max_length: int, current_id:
         if edge_distance > max_length:
             number_of_padding_nodes = ceil(edge_distance / max_length)
             # remove old edge
-            graph.remove_edge(*edge)
+            edges_to_be_removed.append((edge[0], edge[1]))
             # add all padding nodes and the edges
             previous_edge_id = edge[0]
             for padding_node_number in range(1, number_of_padding_nodes):
-                relative_distance_between_nodes = edge_distance * padding_node_number / number_of_padding_nodes
+                relative_distance_between_nodes = padding_node_number / number_of_padding_nodes
                 padding_node_position = get_padding_node_position(node1, node2, relative_distance_between_nodes)
 
                 # attributes of the new node
-                node_attributes = node1
-                node_attributes['x'] = padding_node_position[0]
-                node_attributes['y'] = padding_node_position[1]
-                node_attributes['z'] = padding_node_position[2]
-
+                padding_node_attributes = deepcopy(node1)
+                padding_node_attributes['position'] = (padding_node_position[0],
+                                               padding_node_position[1],
+                                               padding_node_position[2])
+                padding_node_attributes['id'] = current_id
                 # add node and edge to predecessor
-                graph.add_node(current_id, **node_attributes)
-                graph.add_edge(previous_edge_id, current_id)
+                nodes_to_be_added.append(padding_node_attributes)
+                edges_to_be_added.append((previous_edge_id, current_id))
 
                 # update variables
                 previous_edge_id = current_id
                 current_id += 1
             # add the edge between the last padding node and the second original node
-            graph.add_edge(previous_edge_id, edge[1])
+            edges_to_be_added.append((previous_edge_id, edge[1]))
+
+    graph.remove_edges_from(edges_to_be_removed)
+    graph.add_edges_from(edges_to_be_added)
+    for node in nodes_to_be_added:
+        graph.add_node(node['id'], **node)
 
     return current_id
