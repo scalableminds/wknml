@@ -49,17 +49,17 @@ def approximate_minimal_edge_length(nml_or_graph: Union[NML, nx.Graph], max_leng
         nml_graph, parameter_dict = generate_graph(nml_or_graph)
     for group in nml_graph.values():
         for graph in group:
-            approximate_minimal_edge_length(graph, max_length)
+            approximate_minimal_edge_length_for_graph(graph, max_length, max_angle)
 
     # return the same format as the input
     if isinstance(nml_or_graph, nx.Graph):
         return nml_graph
     else:
-        return generate_nml(nml_graph, parameter_dict, globalize=False)
+        return generate_nml(nml_graph, parameter_dict, globalize_ids=False)
 
 
-def approximate_minimal_edge_length(graph: nx.Graph, max_length: int, max_angle: float):
-    all_nodes_with_degree_of_two = [node for node in graph.nodes if graph.degee(node) == 2]
+def approximate_minimal_edge_length_for_graph(graph: nx.Graph, max_length: int, max_angle: float):
+    all_nodes_with_degree_of_two = [node for node in graph.nodes if graph.degree(node) == 2]
 
     for two_degree_node in all_nodes_with_degree_of_two:
         current_node = graph.nodes[two_degree_node]
@@ -72,5 +72,6 @@ def approximate_minimal_edge_length(graph: nx.Graph, max_length: int, max_angle:
         distance_between_combined_edges = vector_length(new_edge_vector)
         angle = calculate_angle_between_vectors(vector1, vector2)
         if angle <= max_angle and distance_between_combined_edges <= max_length:
-            graph.remove_edges_from([(neighbors[0], two_degree_node), (two_degree_node, neighbor2[0])])
+            graph.remove_edges_from([(neighbors[0], two_degree_node), (two_degree_node, neighbors[1])])
+            graph.remove_node(two_degree_node)
             graph.add_edge(neighbors[0], neighbors[1])
