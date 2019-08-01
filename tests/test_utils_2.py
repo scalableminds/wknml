@@ -14,10 +14,10 @@ def test_approximate_minimal_edge_length():
 
     # need to save and load the test_result_nml since reading applies default values
     # thus this is needed to be able to compare the nmls
-    with open("testoutput/approximate_max_length.nml", "wb") as file:
+    with open("testoutput/approximate_min_length.nml", "wb") as file:
         write_nml(file=file, nml=test_result_nml)
 
-    with open("testoutput/approximate_max_length.nml", "r") as file:
+    with open("testoutput/approximate_min_length.nml", "r") as file:
         test_result_nml = parse_nml(file)
 
     assert test_result_nml == expected_nml
