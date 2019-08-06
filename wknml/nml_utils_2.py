@@ -1,5 +1,6 @@
 from typing import Union, Dict, List
-from math import sqrt, acos
+from math import acos
+import numpy as np
 import networkx as nx
 
 from . import NML
@@ -7,35 +8,24 @@ from .nml_generation import generate_graph, generate_nml
 
 
 def calculate_distance_between_nodes(node1: Dict, node2: Dict) -> float:
-    node1_position = node1['position']
-    node2_position = node2['position']
-    return sqrt((node1_position[0] - node2_position[0]) ** 2 +
-                (node1_position[1] - node2_position[1]) ** 2 +
-                (node1_position[2] - node2_position[2]) ** 2)
+    difference_vector = get_vector_between_nodes(node1, node2)
+    return np.sqrt(difference_vector.dot(difference_vector))
 
 
-def vector_between_nodes(node1: Dict, node2: Dict) -> List[int]:
-    node1_position = node1['position']
-    node2_position = node2['position']
-    return [node2_position[0] - node1_position[0],
-            node2_position[1] - node1_position[1],
-            node2_position[2] - node1_position[2]]
+def get_vector(node: Dict) -> np.ndarray:
+    return np.array(node["position"])
 
 
-def dot_product(vector1: List[int], vector2: List[int]) -> int:
-    return vector1[0] * vector2[0] + \
-           vector1[1] * vector2[1] + \
-           vector1[2] * vector2[2]
+def get_vector_between_nodes(node1: Dict, node2: Dict) -> np.ndarray:
+    return get_vector(node2) - get_vector(node1)
 
 
-def vector_length(vector: List[int]) -> int:
-    return sqrt(vector[0] ** 2 +
-                vector[1] ** 2 +
-                vector[2] ** 2)
+def vector_length(vector: List[int]) -> np.ndarray:
+    return np.sqrt(vector.dot(vector))
 
 
-def calculate_angle_between_vectors(vector1: List[int], vector2: List[int]):
-    dot_val = dot_product(vector1, vector2)
+def calculate_angle_between_vectors(vector1: np.ndarray, vector2: np.ndarray) -> float:
+    dot_val = vector1.dot(vector2)
     length_values = vector_length(vector1) * vector_length(vector2)
     angle = acos(dot_val / length_values)
     return angle
@@ -66,9 +56,9 @@ def approximate_minimal_edge_length_for_graph(graph: nx.Graph, max_length: int, 
         neighbors = list(graph.neighbors(two_degree_node))
         neighbor1 = graph.nodes[neighbors[0]]
         neighbor2 = graph.nodes[neighbors[1]]
-        vector1 = vector_between_nodes(neighbor1, current_node)
-        vector2 = vector_between_nodes(current_node, neighbor2)
-        new_edge_vector = vector_between_nodes(neighbor1, neighbor2)
+        vector1 = get_vector_between_nodes(neighbor1, current_node)
+        vector2 = get_vector_between_nodes(current_node, neighbor2)
+        new_edge_vector = get_vector_between_nodes(neighbor1, neighbor2)
         distance_between_combined_edges = vector_length(new_edge_vector)
         angle = calculate_angle_between_vectors(vector1, vector2)
         if angle <= max_angle and distance_between_combined_edges <= max_length:
