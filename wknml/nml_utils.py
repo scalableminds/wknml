@@ -1,5 +1,5 @@
 from typing import Union, Dict, List
-from math import sqrt, ceil
+from math import ceil
 from copy import deepcopy
 import networkx as nx
 import numpy as np
@@ -28,35 +28,30 @@ def ensure_max_edge_length(nml_or_graph: Union[NML, nx.Graph], max_length: int) 
 
 
 def calculate_distance_between_nodes(node1: Dict, node2: Dict) -> float:
-    node1_position = node1['position']
-    node2_position = node2['position']
-    return sqrt((node1_position[0] - node2_position[0]) ** 2 +
-                (node1_position[1] - node2_position[1]) ** 2 +
-                (node1_position[2] - node2_position[2]) ** 2)
+    difference_vector = get_vector_between_nodes(node1, node2)
+    return np.sqrt(difference_vector.dot(difference_vector))
 
 
-def get_vector_between_nodes(node1: Dict, node2: Dict) -> List[int]:
-    node1_position = node1['position']
-    node2_position = node2['position']
-    return [node2_position[0] - node1_position[0],
-            node2_position[1] - node1_position[1],
-            node2_position[2] - node1_position[2]]
+def get_vector(node: Dict) -> np.ndarray:
+    return np.array(node["position"])
+
+
+def get_vector_between_nodes(node1: Dict, node2: Dict) -> np.ndarray:
+    return get_vector(node2) - get_vector(node1)
 
 
 def get_padding_node_position(node1: Dict, node2: Dict, relative_distance_along_vector: float) -> List[int]:
-    node1_position = node1['position']
+    node1_position = get_vector(node1)
     vector_between_nodes = get_vector_between_nodes(node1, node2)
-    return [node1_position[0] + vector_between_nodes[0] * relative_distance_along_vector,
-            node1_position[1] + vector_between_nodes[1] * relative_distance_along_vector,
-            node1_position[2] + vector_between_nodes[2] * relative_distance_along_vector]
+    return node1_position + vector_between_nodes * relative_distance_along_vector
 
 
 def detect_max_node_id_from_all_graphs(graph_dict: Dict[str, nx.Graph]) -> int:
-    max_id = None
+    max_id = 0
     for group in graph_dict.values():
         for tree in group:
             max_id_of_current_tree = np.array(list(tree.nodes)).max()
-            max_id = max_id_of_current_tree if not max_id or max_id_of_current_tree > max_id else max_id
+            max_id = max_id_of_current_tree if max_id_of_current_tree > max_id else max_id
 
     return max_id
 
