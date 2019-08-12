@@ -1,4 +1,4 @@
-from typing import Union, Dict, List
+from typing import Union, Dict, List, Tuple
 from math import ceil
 from copy import deepcopy
 import networkx as nx
@@ -8,12 +8,13 @@ from . import NML
 from .nml_generation import generate_graph, generate_nml
 
 
-def ensure_max_edge_length(nml_or_graph: Union[NML, nx.Graph], max_length: int) -> Union[NML, nx.Graph]:
+def ensure_max_edge_length(nml_or_graph: Union[NML, Tuple[Dict[str, List[nx.Graph]], Dict]], max_length: int) -> Union[NML, nx.Graph]:
     # it is easier to operate on a graph
-    if isinstance(nml_or_graph, nx.Graph):
-        nml_graph = nml_or_graph
-    else:
+    if isinstance(nml_or_graph, NML):
         nml_graph, parameter_dict = generate_graph(nml_or_graph)
+    else:
+        nml_graph = nml_or_graph[0]
+        parameter_dict = nml_or_graph[1]
     max_id = detect_max_node_id_from_all_graphs(nml_graph)
     next_valid_id = max_id + 1
     for group in nml_graph.values():
@@ -21,10 +22,11 @@ def ensure_max_edge_length(nml_or_graph: Union[NML, nx.Graph], max_length: int) 
             next_valid_id = ensure_max_edge_length_in_tree(graph, max_length, next_valid_id)
 
     # return the same format as the input
-    if isinstance(nml_or_graph, nx.Graph):
+    if isinstance(nml_or_graph, NML):
+        return generate_nml(nml_graph, parameter_dict, globalize=False)
         return nml_graph
     else:
-        return generate_nml(nml_graph, parameter_dict, globalize=False)
+        return nml_graph
 
 
 def calculate_distance_between_nodes(node1: Dict, node2: Dict) -> float:
@@ -66,13 +68,13 @@ def ensure_max_edge_length_in_tree(graph: nx.Graph, max_length: int, current_id:
         edge_distance = calculate_distance_between_nodes(node1, node2)
         # add padding nodes if the distance is too high
         if edge_distance > max_length:
-            number_of_padding_nodes = ceil(edge_distance / max_length)
+            number_of_nodes = ceil(edge_distance / max_length)
             # remove old edge
             edges_to_be_removed.append((edge[0], edge[1]))
             # add all padding nodes and the edges
             previous_edge_id = edge[0]
-            for padding_node_number in range(1, number_of_padding_nodes):
-                relative_distance_between_nodes = padding_node_number / number_of_padding_nodes
+            for padding_node_number in range(1, number_of_nodes):
+                relative_distance_between_nodes = padding_node_number / number_of_nodes
                 padding_node_position = get_padding_node_position(node1, node2, relative_distance_between_nodes)
 
                 # attributes of the new node
