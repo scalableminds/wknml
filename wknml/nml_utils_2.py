@@ -33,25 +33,26 @@ def calculate_angle_between_vectors(vector1: np.ndarray, vector2: np.ndarray) ->
 
 def approximate_minimal_edge_length(nml_or_graph: Union[NML, nx.Graph], max_length: int, max_angle: float) -> Union[NML, nx.Graph]:
     # it is easier to operate on a graph
-    if isinstance(nml_or_graph, nx.Graph):
-        nml_graph = nml_or_graph
-    else:
+    if isinstance(nml_or_graph, NML):
         nml_graph, parameter_dict = generate_graph(nml_or_graph)
+    else:
+        nml_graph = nml_or_graph[0]
+        parameter_dict = nml_or_graph[1]
     for group in nml_graph.values():
         for graph in group:
             approximate_minimal_edge_length_for_graph(graph, max_length, max_angle)
 
     # return the same format as the input
-    if isinstance(nml_or_graph, nx.Graph):
-        return nml_graph
-    else:
+    if isinstance(nml_or_graph, NML):
         return generate_nml(nml_graph, parameter_dict, globalize_ids=False)
+    else:
+        return nml_graph, parameter_dict
 
 
 def approximate_minimal_edge_length_for_graph(graph: nx.Graph, max_length: int, max_angle: float):
-    all_nodes_with_degree_of_two = [node for node in graph.nodes if graph.degree(node) == 2]
+    nodes_with_degree_of_two = [node for node in graph.nodes if graph.degree(node) == 2]
 
-    for two_degree_node in all_nodes_with_degree_of_two:
+    for two_degree_node in nodes_with_degree_of_two:
         current_node = graph.nodes[two_degree_node]
         neighbors = list(graph.neighbors(two_degree_node))
         neighbor1 = graph.nodes[neighbors[0]]
