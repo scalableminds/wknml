@@ -1,5 +1,5 @@
 from wknml import parse_nml
-from wknml.nml_utils_2 import approximate_minimal_edge_length, get_vector_between_nodes, vector_length, calculate_angle_between_vectors
+from wknml.nml_utils import approximate_minimal_edge_length, get_vector_between_nodes, vector_length, calculate_angle_between_vectors
 from wknml.nml_generation import generate_graph
 
 
