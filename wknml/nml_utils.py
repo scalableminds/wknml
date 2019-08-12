@@ -53,8 +53,7 @@ def detect_max_node_id_from_all_graphs(graph_dict: Dict[str, nx.Graph]) -> int:
     for group in graph_dict.values():
         for tree in group:
             max_id_of_current_tree = np.array(list(tree.nodes)).max()
-            max_id = max_id_of_current_tree if max_id_of_current_tree > max_id else max_id
-
+            max_id = max(max_id_of_current_tree, max_id)
     return max_id
 
 
