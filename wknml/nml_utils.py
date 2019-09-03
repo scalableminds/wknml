@@ -12,7 +12,7 @@ def get_vector(node: Dict) -> np.ndarray:
     return np.array(node["position"])
 
 
-def vector_length(vector: List[int]) -> np.ndarray:
+def vector_length(vector: np.ndarray) -> np.ndarray:
     return np.sqrt(vector.dot(vector))
 
 
@@ -84,7 +84,7 @@ def approximate_minimal_edge_length_for_graph(graph: nx.Graph, max_length: int, 
             graph.add_edge(neighbors[0], neighbors[1])
 
 
-def ensure_max_edge_length(nml_or_graph: Union[NML, Tuple[Dict[str, List[nx.Graph]], Dict]], max_length: int) -> Union[NML, nx.Graph]:
+def ensure_max_edge_length(nml_or_graph: Union[NML, Tuple[Dict[str, List[nx.Graph]], Dict]], max_length: int) -> Union[NML, Tuple[Dict[str, List[nx.Graph]], Dict]]:
     # it is easier to operate on a graph
     if isinstance(nml_or_graph, NML):
         nml_graph, parameter_dict = generate_graph(nml_or_graph)
@@ -100,7 +100,6 @@ def ensure_max_edge_length(nml_or_graph: Union[NML, Tuple[Dict[str, List[nx.Grap
     # return the same format as the input
     if isinstance(nml_or_graph, NML):
         return generate_nml(nml_graph, parameter_dict, globalize_ids=False)
-        return nml_graph
     else:
         return nml_graph
 
@@ -119,7 +118,7 @@ def ensure_max_edge_length_for_graph(graph: nx.Graph, max_length: int, current_i
             # remove old edge
             edges_to_be_removed.append((edge[0], edge[1]))
             # add all padding nodes and the edges
-            previous_edge_id = edge[0]
+            previous_node_id = edge[0]
             for padding_node_number in range(1, number_of_nodes):
                 relative_distance_between_nodes = padding_node_number / number_of_nodes
                 padding_node_position = get_padding_node_position(node1, node2, relative_distance_between_nodes)
@@ -132,13 +131,13 @@ def ensure_max_edge_length_for_graph(graph: nx.Graph, max_length: int, current_i
                 padding_node_attributes['id'] = current_id
                 # add node and edge to predecessor
                 nodes_to_be_added.append(padding_node_attributes)
-                edges_to_be_added.append((previous_edge_id, current_id))
+                edges_to_be_added.append((previous_node_id, current_id))
 
                 # update variables
-                previous_edge_id = current_id
+                previous_node_id = current_id
                 current_id += 1
             # add the edge between the last padding node and the second original node
-            edges_to_be_added.append((previous_edge_id, edge[1]))
+            edges_to_be_added.append((previous_node_id, edge[1]))
 
     graph.remove_edges_from(edges_to_be_removed)
     graph.add_edges_from(edges_to_be_added)

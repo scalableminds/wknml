@@ -20,7 +20,7 @@ def test_ensure_max_edge_length():
     assert_max_length(test_result_nml, max_length)
 
 
-def assert_max_length(graph_dict: Dict[str, List[nx.Graph]], max_length: int):
+def assert_max_length(graph_dict: Dict[str, List[nx.Graph]], max_length: float):
     # test if all edges are smaller than the max length
     for group in graph_dict.values():
         for graph in group:
