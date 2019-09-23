@@ -2,7 +2,6 @@ import xml.etree.ElementTree as ET
 from loxun import XmlWriter
 from typing import NamedTuple, List, Tuple, Optional
 import collections
-import numbers
 
 Vector3 = Tuple[float, float, float]
 Vector4 = Tuple[float, float, float, float]
@@ -174,7 +173,7 @@ def parse_parameters(nml_parameters):
 def parse_node(nml_node):
     return Node(
         id=int(nml_node.get("id")),
-        radius=float(nml_node.get("radius", default=None)),
+        radius=float(nml_node.get("radius", default=1.0)),
         position=(
             float(nml_node.get("x")),
             float(nml_node.get("y")),
@@ -324,28 +323,28 @@ def dump_parameters(xf, parameters):
         "z": str(parameters.scale[2]),
     })
 
-    if parameters.offset is not None:
+    if parameters.offset is not None and parameters.offset != (0, 0, 0):
         xf.tag("offset", {
             "x": str(parameters.offset[0]),
             "y": str(parameters.offset[1]),
             "z": str(parameters.offset[2]),
         })
 
-    if parameters.time is not None:
+    if parameters.time is not None and parameters.time != 0:
         xf.tag("time", {"ms": str(parameters.time)})
-    if parameters.editPosition is not None:
+    if parameters.editPosition is not None and parameters.editPosition != (0, 0, 0):
         xf.tag("editPosition", {
             "x": str(parameters.editPosition[0]),
             "y": str(parameters.editPosition[1]),
             "z": str(parameters.editPosition[2]),
         })
-    if parameters.editRotation is not None:
+    if parameters.editRotation is not None and parameters.editRotation != (0, 0, 0):
         xf.tag("editRotation", {
             "xRot": str(parameters.editRotation[0]),
             "yRot": str(parameters.editRotation[1]),
             "zRot": str(parameters.editRotation[2]),
         })
-    if parameters.zoomLevel is not None:
+    if parameters.zoomLevel is not None and parameters.zoomLevel != 0:
         xf.tag("zoomLevel", {"zoom": str(parameters.zoomLevel)})
 
     dump_bounding_box(xf, parameters, "task")
@@ -363,26 +362,27 @@ def dump_node(xf, node):
         "z": str(node.position[2]),
     }
 
-    attributes["radius"] = str(node.radius) if node.radius else 1.0
+    if node.radius is not None and node.radius != 1.0:
+        attributes["radius"] = str(node.radius)
 
-    if node.rotation is not None:
+    if node.rotation is not None and node.rotation != (0, 0, 0):
         attributes["rotX"] = str(node.rotation[0])
         attributes["rotY"] = str(node.rotation[1])
         attributes["rotZ"] = str(node.rotation[2])
 
-    if node.inVp is not None:
+    if node.inVp is not None and node.inVp != 0:
         attributes["inVp"] = str(node.inVp)
 
-    if node.inMag is not None:
+    if node.inMag is not None and node.inMag != 0:
         attributes["inMag"] = str(node.inMag)
 
-    if node.bitDepth is not None:
+    if node.bitDepth is not None and node.bitDepth != 8:
         attributes["bitDepth"] = str(node.bitDepth)
 
-    if node.interpolation is not None:
+    if node.interpolation is not None and not node.interpolation:
         attributes["interpolation"] = str(node.interpolation)
 
-    if node.time is not None:
+    if node.time is not None and node.time != 0:
         attributes["time"] = str(node.time)
 
     xf.tag("node", attributes)
@@ -416,15 +416,25 @@ def dump_tree(xf, tree):
 
 
 def dump_branchpoint(xf, branchpoint):
-    xf.tag(
-        "branchpoint", {"id": str(branchpoint.id), "time": str(branchpoint.time)}
-    )
+    if branchpoint.time is not None and branchpoint.time != 0:
+        xf.tag(
+            "branchpoint", {"id": str(branchpoint.id), "time": str(branchpoint.time)}
+        )
+    else:
+        xf.tag(
+            "branchpoint", {"id": str(branchpoint.id)}
+        )
 
 
 def dump_comment(xf, comment):
-    xf.tag(
-        "comment", {"node": str(comment.node), "content": comment.content}
-    )
+    if comment.content is not None and comment.content != "":
+        xf.tag(
+            "comment", {"node": str(comment.node), "content": comment.content}
+        )
+    else:
+        xf.tag(
+            "comment", {"node": str(comment.node)}
+        )
 
 
 def dump_group(xf, group):

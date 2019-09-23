@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<things>
+  <parameters>
+    <experiment name="test_dataset" />
+    <scale x="11.0" y="11.0" z="25.0" />
+  </parameters>
+  <thing color.a="1.0" color.b="0.8" color.g="0.3" color.r="0.4" id="1" name="tree1">
+    <nodes>
+      <node id="1" x="1.0" y="2.0" z="3.0" />
+      <node id="2" radius="2.0" rotX="0.2" rotY="0.2" rotZ="0.2" x="1.0" y="2.0" z="3.0" />
+    </nodes>
+    <edges>
+      <edge source="1" target="2" />
+    </edges>
+  </thing>
+  <branchpoints>
+    <branchpoint id="1" />
+  </branchpoints>
+  <comments>
+    <comment node="1" />
+  </comments>
+  <groups>
+    <group id="1" name="group" />
+  </groups>
+</things>
