@@ -27,6 +27,7 @@ def calculate_angle_between_vectors(vector1: np.ndarray, vector2: np.ndarray) ->
     return angle
 
 
+# returns the distance between the two provided nodes
 def calculate_distance_between_nodes(node1: Dict, node2: Dict, scale: np.ndarray) -> float:
     difference_vector = get_vector_between_nodes(node1, node2, scale)
     return vector_length(difference_vector)
