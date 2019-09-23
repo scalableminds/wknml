@@ -14,19 +14,19 @@ def test_ensure_max_edge_length():
 
     test_nml_graph = generate_graph(test_nml)
     # test if the loaded graph violates the max_length
-    assert not max_length_violated(test_nml_graph[0], max_length, scale)
+    assert not is_max_length_violated(test_nml_graph[0], max_length, scale)
 
     # test the graph version
     test_result_nml_graph, _ = ensure_max_edge_length(test_nml_graph, max_length)
-    assert max_length_violated(test_result_nml_graph, max_length, scale)
+    assert is_max_length_violated(test_result_nml_graph, max_length, scale)
 
     # test the nml version
     test_result_nml = ensure_max_edge_length(test_nml, max_length)
     test_result_nml, _ = generate_graph(test_result_nml)
-    assert max_length_violated(test_result_nml, max_length, scale)
+    assert is_max_length_violated(test_result_nml, max_length, scale)
 
 
-def max_length_violated(graph_dict: Dict[str, List[nx.Graph]], max_length: float, scale: np.ndarray):
+def is_max_length_violated(graph_dict: Dict[str, List[nx.Graph]], max_length: float, scale: np.ndarray):
     # test if all edges are smaller than the max length
     for group in graph_dict.values():
         for graph in group:
@@ -48,19 +48,19 @@ def test_approximate_minimal_edge_length():
 
     test_nml_graph = generate_graph(test_nml)
     # test if the loaded graph violates the max_length
-    assert not approximate_minimal_edge_length_violated(test_nml_graph[0], max_length, max_angle, scale)
+    assert not is_minimal_edge_length_violated(test_nml_graph[0], max_length, max_angle, scale)
 
     # test the graph interface
     test_result_nml_graph, _ = approximate_minimal_edge_length(test_nml_graph, max_length, max_angle)
-    assert approximate_minimal_edge_length_violated(test_result_nml_graph, max_length, max_angle, scale)
+    assert is_minimal_edge_length_violated(test_result_nml_graph, max_length, max_angle, scale)
 
     # test the graph interface
     test_result_nml = approximate_minimal_edge_length(test_nml, max_length, max_angle)
     test_result_nml, _ = generate_graph(test_result_nml)
-    assert approximate_minimal_edge_length_violated(test_result_nml, max_length, max_angle, scale)
+    assert is_minimal_edge_length_violated(test_result_nml, max_length, max_angle, scale)
 
 
-def approximate_minimal_edge_length_violated(graph_dict: Dict[str, List[nx.Graph]], max_length: int, max_angle: int, scale: np.ndarray):
+def is_minimal_edge_length_violated(graph_dict: Dict[str, List[nx.Graph]], max_length: int, max_angle: int, scale: np.ndarray):
     for group in graph_dict.values():
         for graph in group:
             nodes_with_degree_of_two = [node for node in graph.nodes if graph.degree(node) == 2]

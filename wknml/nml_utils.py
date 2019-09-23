@@ -29,13 +29,13 @@ def calculate_angle_between_vectors(vector1: np.ndarray, vector2: np.ndarray) ->
 
 def calculate_distance_between_nodes(node1: Dict, node2: Dict, scale: np.ndarray) -> float:
     difference_vector = get_vector_between_nodes(node1, node2, scale)
-    return np.sqrt(difference_vector.dot(difference_vector))
+    return vector_length(difference_vector)
 
 
 def get_padding_node_position(node1: Dict, node2: Dict, relative_distance_along_vector: float, scale: np.ndarray) -> List[int]:
     node1_position = get_vector(node1, scale)
     vector_between_nodes = get_vector_between_nodes(node1, node2, scale)
-    return node1_position + vector_between_nodes * relative_distance_along_vector
+    return (node1_position + vector_between_nodes * relative_distance_along_vector) / scale
 
 
 def detect_max_node_id_from_all_graphs(graph_dict: Dict[str, nx.Graph]) -> int:
