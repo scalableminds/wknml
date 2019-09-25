@@ -2,6 +2,7 @@ from wknml import parse_nml, write_nml
 from wknml.nml_generation import generate_graph, generate_nml
 import os
 
+
 def test_generate_nml():
     with open("testdata/nml_with_invalid_ids.nml", "r") as file:
         test_nml = parse_nml(file)
@@ -29,7 +30,6 @@ def test_no_default_values_written():
         test_nml = parse_nml(file)
         with open("testoutput/nml_without_default_values.nml", "wb") as output_file:
             write_nml(file=output_file, nml=test_nml)
-
 
     # read the written testfile and compare the content
     with open("testdata/nml_without_default_values.nml", "r") as file:

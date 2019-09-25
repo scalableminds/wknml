@@ -8,6 +8,7 @@
     <nodes>
       <node id="1" x="1.0" y="2.0" z="3.0" />
       <node id="2" radius="2.0" rotX="0.2" rotY="0.2" rotZ="0.2" x="1.0" y="2.0" z="3.0" />
+      <node bitDepth="8" id="3" inMag="1" inVp="1" radius="2.0" rotX="0.2" rotY="0.2" rotZ="0.2" x="1.0" y="2.0" z="3.0" />
     </nodes>
     <edges>
       <edge source="1" target="2" />
@@ -15,9 +16,11 @@
   </thing>
   <branchpoints>
     <branchpoint id="1" />
+    <branchpoint id="2" time="0" />
   </branchpoints>
   <comments>
     <comment node="1" />
+    <comment content="test" node="2" />
   </comments>
   <groups>
     <group id="1" name="group" />
