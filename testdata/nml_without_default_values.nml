@@ -9,6 +9,7 @@
       <node id="1" x="1.0" y="2.0" z="3.0" />
       <node id="2" radius="2.0" rotX="0.2" rotY="0.2" rotZ="0.2" x="1.0" y="2.0" z="3.0" />
       <node bitDepth="8" id="3" inMag="1" inVp="1" radius="2.0" rotX="0.2" rotY="0.2" rotZ="0.2" x="1.0" y="2.0" z="3.0" />
+      <node bitDepth="0" id="0" inMag="0" inVp="0" radius="0.0" rotX="0.0" rotY="0.0" rotZ="0.0" x="0.0" y="0.0" z="0.0" />
     </nodes>
     <edges>
       <edge source="1" target="2" />
@@ -21,6 +22,7 @@
   <comments>
     <comment node="1" />
     <comment content="test" node="2" />
+    <comment content="" node="2" />
   </comments>
   <groups>
     <group id="1" name="group" />
