@@ -27,12 +27,15 @@ def calculate_angle_between_vectors(vector1: np.ndarray, vector2: np.ndarray) ->
     return angle
 
 
-# returns the distance between the two provided nodes
 def calculate_distance_between_nodes(node1: Dict, node2: Dict, scale: np.ndarray) -> float:
     difference_vector = get_vector_between_nodes(node1, node2, scale)
     return vector_length(difference_vector)
 
 
+# First calculate the vector from node1 to node2 and then scale it with the percentage of scale.
+# Therefore it returns a position along the vector between node1 and node2.
+# The Position along the vector is determined by the scale.
+# It is used to calculate the padding node position which is needed to ensure the maximum length.
 def get_padding_node_position(node1: Dict, node2: Dict, relative_distance_along_vector: float, scale: np.ndarray) -> List[int]:
     node1_position = get_vector(node1, scale)
     vector_between_nodes = get_vector_between_nodes(node1, node2, scale)
