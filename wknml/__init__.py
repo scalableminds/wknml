@@ -179,18 +179,18 @@ def parse_node(nml_node):
 
     return Node(
         id=int(nml_node.get("id")),
-        radius=float(nml_node.get("radius")) if nml_node.get("radius") else None,
+        radius=float(nml_node.get("radius")) if nml_node.get("radius") is not None else None,
         position=(
             float(nml_node.get("x")),
             float(nml_node.get("y")),
             float(nml_node.get("z")),
         ),
         rotation=rotation,
-        inVp=int(nml_node.get("inVp")) if nml_node.get("inVp") else None,
-        inMag=int(nml_node.get("inMag")) if nml_node.get("inMag") else None,
-        bitDepth=int(nml_node.get("bitDepth")) if nml_node.get("bitDepth") else None,
-        interpolation=bool(nml_node.get("interpolation")) if nml_node.get("interpolation") else None,
-        time=int(nml_node.get("time")) if nml_node.get("time") else None,
+        inVp=int(nml_node.get("inVp")) if nml_node.get("inVp") is not None else None,
+        inMag=int(nml_node.get("inMag")) if nml_node.get("inMag") is not None else None,
+        bitDepth=int(nml_node.get("bitDepth")) if nml_node.get("bitDepth") is not None else None,
+        interpolation=bool(nml_node.get("interpolation")) if nml_node.get("interpolation") is not None else None,
+        time=int(nml_node.get("time")) if nml_node.get("time") is not None else None,
     )
 
 
@@ -236,7 +236,7 @@ def parse_tree(nml_tree):
 
 
 def parse_branchpoint(nml_branchpoint):
-    return Branchpoint(int(nml_branchpoint.get("id")), int(nml_branchpoint.get("time")) if nml_branchpoint.get("time") else None)
+    return Branchpoint(int(nml_branchpoint.get("id")), int(nml_branchpoint.get("time")) if nml_branchpoint.get("time") is not None else None)
 
 
 def parse_comment(nml_comment):
