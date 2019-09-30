@@ -88,7 +88,7 @@ def approximate_minimal_edge_length_for_graph(graph: nx.Graph, max_length: float
             graph.add_edge(neighbors[0], neighbors[1])
 
 
-def ensure_max_edge_length(nml_or_graph: Union[NML, Tuple[Dict[str, List[nx.Graph]], Dict]], max_length: int) -> Union[NML, Tuple[Dict[str, List[nx.Graph]], Dict]]:
+def ensure_max_edge_length(nml_or_graph: Union[NML, Tuple[Dict[str, List[nx.Graph]], Dict]], max_length: float) -> Union[NML, Tuple[Dict[str, List[nx.Graph]], Dict]]:
     # it is easier to operate on a graph
     if isinstance(nml_or_graph, NML):
         nml_graph, parameter_dict = generate_graph(nml_or_graph)
