@@ -38,9 +38,3 @@ def test_snapshot_read_and_compare_nml():
         with open(output_file, 'wb') as f:
             wknml.write_nml(f, parsed)
         assert filecmp.cmp(snapshot_file + '.snapshot', output_file)
-
-
-if __name__ == "__main__":
-    test_snapshot_read_and_compare_nml()
-    test_read_and_write_and_read()
-    test_snapshot_read_and_compare_pickle()
