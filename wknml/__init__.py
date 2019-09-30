@@ -2,7 +2,6 @@ import xml.etree.ElementTree as ET
 from loxun import XmlWriter
 from typing import NamedTuple, List, Tuple, Optional
 import collections
-import numbers
 
 Vector3 = Tuple[float, float, float]
 Vector4 = Tuple[float, float, float, float]
@@ -119,7 +118,7 @@ def parse_bounding_box(nml_parameters, prefix):
 
 
 def parse_parameters(nml_parameters):
-    offset = (0, 0, 0)
+    offset = None
     if nml_parameters.find("offset") is not None:
         offset = (
             float(nml_parameters.find("offset").get("x")),
@@ -127,7 +126,7 @@ def parse_parameters(nml_parameters):
             float(nml_parameters.find("offset").get("z")),
         )
 
-    editRotation = (0, 0, 0)
+    editRotation = None
     if nml_parameters.find("editRotation") is not None:
         editRotation = (
             float(nml_parameters.find("editRotation").get("xRot")),
@@ -135,7 +134,7 @@ def parse_parameters(nml_parameters):
             float(nml_parameters.find("editRotation").get("zRot")),
         )
 
-    editPosition = (0, 0, 0)
+    editPosition = None
     if nml_parameters.find("editPosition") is not None:
       editPosition = (
         float(nml_parameters.find("editPosition").get("x")),
@@ -143,11 +142,11 @@ def parse_parameters(nml_parameters):
         float(nml_parameters.find("editPosition").get("z")),
       )
 
-    time = 0
+    time = None
     if nml_parameters.find("time") is not None:
       time = int(nml_parameters.find("time").get("ms"))
 
-    zoomLevel = 0
+    zoomLevel = None
     if nml_parameters.find("zoomLevel") is not None:
         zoomLevel = nml_parameters.find("zoomLevel").get("zoom")
 
@@ -172,24 +171,26 @@ def parse_parameters(nml_parameters):
 
 
 def parse_node(nml_node):
+    rotation = None
+    if nml_node.get("rotX") is not None:
+        rotation = (float(nml_node.get("rotX")),
+        float(nml_node.get("rotY")),
+        float(nml_node.get("rotZ")))
+
     return Node(
         id=int(nml_node.get("id")),
-        radius=float(nml_node.get("radius", default=None)),
+        radius=float(nml_node.get("radius")) if nml_node.get("radius") is not None else None,
         position=(
             float(nml_node.get("x")),
             float(nml_node.get("y")),
             float(nml_node.get("z")),
         ),
-        rotation=(
-            float(nml_node.get("rotX", default=0)),
-            float(nml_node.get("rotY", default=0)),
-            float(nml_node.get("rotZ", default=0)),
-        ),
-        inVp=int(nml_node.get("inVp", default=0)),
-        inMag=int(nml_node.get("inMag", default=0)),
-        bitDepth=int(nml_node.get("bitDepth", default=8)),
-        interpolation=bool(nml_node.get("interpolation", default=True)),
-        time=int(nml_node.get("time", default=0)),
+        rotation=rotation,
+        inVp=int(nml_node.get("inVp")) if nml_node.get("inVp") is not None else None,
+        inMag=int(nml_node.get("inMag")) if nml_node.get("inMag") is not None else None,
+        bitDepth=int(nml_node.get("bitDepth")) if nml_node.get("bitDepth") is not None else None,
+        interpolation=bool(nml_node.get("interpolation")) if nml_node.get("interpolation") is not None else None,
+        time=int(nml_node.get("time")) if nml_node.get("time") is not None else None,
     )
 
 
@@ -198,13 +199,13 @@ def parse_edge(nml_edge):
 
 
 def parse_tree(nml_tree):
-    name = ""
+    name = None
     if "comment" in nml_tree.attrib:
         name = nml_tree.get("comment")
     if "name" in nml_tree.attrib:
         name = nml_tree.get("name")
 
-    color = (1, 0, 0, 1)
+    color = None
     if "color.r" in nml_tree.attrib:
         color = (
             float(nml_tree.get("color.r")),
@@ -235,15 +236,15 @@ def parse_tree(nml_tree):
 
 
 def parse_branchpoint(nml_branchpoint):
-    return Branchpoint(int(nml_branchpoint.get("id")), int(nml_branchpoint.get("time", 0)))
+    return Branchpoint(int(nml_branchpoint.get("id")), int(nml_branchpoint.get("time")) if nml_branchpoint.get("time") is not None else None)
 
 
 def parse_comment(nml_comment):
-    return Comment(int(nml_comment.get("node")), nml_comment.get("content", default=""))
+    return Comment(int(nml_comment.get("node")), nml_comment.get("content", default=None))
 
 
 def parse_group(nml_group):
-    return Group(int(nml_group.get("id")), nml_group.get("name", default=""), [])
+    return Group(int(nml_group.get("id")), nml_group.get("name", default=None), [])
 
 
 def parse_nml(file):
@@ -363,7 +364,8 @@ def dump_node(xf, node):
         "z": str(node.position[2]),
     }
 
-    attributes["radius"] = str(node.radius) if node.radius else 1.0
+    if node.radius is not None:
+        attributes["radius"] = str(node.radius)
 
     if node.rotation is not None:
         attributes["rotX"] = str(node.rotation[0])
@@ -416,15 +418,25 @@ def dump_tree(xf, tree):
 
 
 def dump_branchpoint(xf, branchpoint):
-    xf.tag(
-        "branchpoint", {"id": str(branchpoint.id), "time": str(branchpoint.time)}
-    )
+    if branchpoint.time is not None:
+        xf.tag(
+            "branchpoint", {"id": str(branchpoint.id), "time": str(branchpoint.time)}
+        )
+    else:
+        xf.tag(
+            "branchpoint", {"id": str(branchpoint.id)}
+        )
 
 
 def dump_comment(xf, comment):
-    xf.tag(
-        "comment", {"node": str(comment.node), "content": comment.content}
-    )
+    if comment.content is not None:
+        xf.tag(
+            "comment", {"node": str(comment.node), "content": comment.content}
+        )
+    else:
+        xf.tag(
+            "comment", {"node": str(comment.node)}
+        )
 
 
 def dump_group(xf, group):
