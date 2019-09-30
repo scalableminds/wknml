@@ -108,7 +108,7 @@ def ensure_max_edge_length(nml_or_graph: Union[NML, Tuple[Dict[str, List[nx.Grap
         return nml_graph, parameter_dict
 
 
-def ensure_max_edge_length_for_graph(graph: nx.Graph, max_length: int, current_id: int, scale: np.ndarray) -> int:
+def ensure_max_edge_length_for_graph(graph: nx.Graph, max_length: float, current_id: int, scale: np.ndarray) -> int:
     edges_to_be_added = []
     edges_to_be_removed = []
     nodes_to_be_added = []
