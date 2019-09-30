@@ -60,7 +60,7 @@ def test_approximate_minimal_edge_length():
     assert is_minimal_edge_length_violated(test_result_nml, max_length, max_angle, scale)
 
 
-def is_minimal_edge_length_violated(graph_dict: Dict[str, List[nx.Graph]], max_length: int, max_angle: int, scale: np.ndarray):
+def is_minimal_edge_length_violated(graph_dict: Dict[str, List[nx.Graph]], max_length: float, max_angle: float, scale: np.ndarray):
     for group in graph_dict.values():
         for graph in group:
             nodes_with_degree_of_two = [node for node in graph.nodes if graph.degree(node) == 2]
