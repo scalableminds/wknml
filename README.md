@@ -1,4 +1,6 @@
 # wknml
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fscalableminds%2Fwknml.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fscalableminds%2Fwknml?ref=badge_shield)
+
 
 Python library for working with webKnossos NML files.
 
@@ -19,3 +21,7 @@ cd wknml
 python -m examples.fix_unlinked_nml <unlinked>.nml <fixed>.nml
 
 ```
+
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fscalableminds%2Fwknml.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fscalableminds%2Fwknml?ref=badge_large)
