@@ -59,7 +59,7 @@ def globalize_node_ids(group_dict: Dict[str, List[nx.Graph]]):
 
 def generate_nml(tree_dict: Union[List[nx.Graph], Dict[str, List[nx.Graph]]], parameters: Dict[str, Any] = {}, globalize_ids=True) -> NML:
   no_group_provided = False
-  if type(tree_dict) is not dict:
+  if not isinstance(tree_dict, dict):
     tree_dict = {"main_group": tree_dict}
     no_group_provided = True
 
