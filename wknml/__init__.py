@@ -12,15 +12,15 @@ class NMLParameters(NamedTuple):
     Contains common metadata for NML files
 
     Attributes:
-        name (str): Foo
-        scale (Vector3): Foo
-        offset (Optional[Vector3]): Foo
-        time (Optional[int]): Foo
-        editPosition (Optional[Vector3]): Foo
-        editRotation (Optional[Vector3]): Foo
-        zoomLevel (Optional[float]): Foo
-        taskBoundingBox (Optional[IntVector6])
-        userBoundingBox (Optional[IntVector6])
+        name: str
+        scale: Vector3
+        offset: Optional[Vector3]
+        time: Optional[int]
+        editPosition: Optional[Vector3]
+        editRotation: Optional[Vector3]
+        zoomLevel: Optional[float]
+        taskBoundingBox: Optional[IntVector6]
+        userBoundingBox: Optional[IntVector6]
     '''
     name: str
     scale: Vector3
@@ -64,8 +64,8 @@ class Edge(NamedTuple):
     A webKnossos skeleton edge.
 
     Attributes:
-        source: int (node id reference)
-        target: int (node id reference)
+        source (int): node id reference
+        target (int): node id reference
     ''' 
     source: int
     target: int
@@ -77,11 +77,11 @@ class Tree(NamedTuple):
 
     Attributes:
         id: int
-        color: Vector4 (RGBA)
+        color (Vector4): RGBA
         name: str
         nodes: List[Node]
         edges: List[Edge]
-        groupId: Optional[int] (group id reference)
+        groupId (Optional[int]): group id reference
     ''' 
     id: int
     color: Vector4
@@ -96,8 +96,8 @@ class Branchpoint(NamedTuple):
     A webKnossos branchpoint, i.e. a skeleton node with more than one outgoing edge.
 
     Attributes:
-        id: int (node id reference)
-        time: int (Unix timestamp)
+        id (int): node id reference
+        time (int): Unix timestamp
     ''' 
     id: int
     time: int
@@ -122,8 +122,8 @@ class Comment(NamedTuple):
     A single comment belonging to a skeleton node.
 
     Attributes:
-        node: int (node id reference)
-        content: str (supports Markdown)
+        node (int): node id reference
+        content (str): supports Markdown
     ''' 
     node: int
     content: str
