@@ -103,8 +103,3 @@ def is_minimal_edge_length_violated(
                 if not angle > max_angle or distance_between_neighbors > max_length:
                     return False
     return True
-
-
-if __name__ == "__main__":
-    test_ensure_max_edge_length()
-    test_approximate_minimal_edge_length()

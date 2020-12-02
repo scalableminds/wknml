@@ -1,8 +1,15 @@
+from pathlib import Path
+
+import pytest
+import filecmp
 from wknml import parse_nml, write_nml
 from wknml.nml_generation import generate_graph, generate_nml
-import os
-import filecmp
 
+
+@pytest.fixture(scope="session", autouse=True)
+def create_temp_output_directory():
+    output_directory = Path("testoutput")
+    output_directory.mkdir(exist_ok=True)
 
 def test_generate_nml():
     with open("testdata/nml_with_invalid_ids.nml", "r") as file:
@@ -48,8 +55,3 @@ def test_no_default_values_written():
     assert filecmp.cmp(
         input_file_name, output_file_name
     ), "The testdata and the testoutput file do not have the same content."
-
-
-if __name__ == "__main__":
-    test_generate_nml()
-    test_no_default_values_written()
