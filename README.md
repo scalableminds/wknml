@@ -1,6 +1,6 @@
 # wknml
 [![PyPI version](https://img.shields.io/pypi/v/wknml)](https://pypi.python.org/pypi/wknml)
-[![Supported Python Versions](https://img.shields.io/pypi/pyversions/rasa.svg)](https://pypi.python.org/pypi/wknml)
+[![Supported Python Versions](https://img.shields.io/pypi/pyversions/wknml.svg)](https://pypi.python.org/pypi/wknml)
 
 Python library for working with [webKnossos](https://webknossos.org) [NML files](https://docs.webknossos.org/reference/data_formats#nml).
 
