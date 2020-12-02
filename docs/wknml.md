@@ -26,15 +26,15 @@ Contains common metadata for NML files
 
 **Attributes**:
 
-- `name` _str_ - Foo
-- `scale` _Vector3_ - Foo
-- `offset` _Optional[Vector3]_ - Foo
-- `time` _Optional[int]_ - Foo
-- `editPosition` _Optional[Vector3]_ - Foo
-- `editRotation` _Optional[Vector3]_ - Foo
-- `zoomLevel` _Optional[float]_ - Foo
-  taskBoundingBox (Optional[IntVector6])
-  userBoundingBox (Optional[IntVector6])
+- `name` - str
+- `scale` - Vector3
+- `offset` - Optional[Vector3]
+- `time` - Optional[int]
+- `editPosition` - Optional[Vector3]
+- `editRotation` - Optional[Vector3]
+- `zoomLevel` - Optional[float]
+- `taskBoundingBox` - Optional[IntVector6]
+- `userBoundingBox` - Optional[IntVector6]
 
 <a name="wknml.Node"></a>
 ## Node Objects
@@ -68,8 +68,8 @@ A webKnossos skeleton edge.
 
 **Attributes**:
 
-- `source` - int (node id reference)
-- `target` - int (node id reference)
+- `source` _int_ - node id reference
+- `target` _int_ - node id reference
 
 <a name="wknml.Tree"></a>
 ## Tree Objects
@@ -83,11 +83,11 @@ A webKnossos skeleton (tree) object. A graph structure consisting of nodes and e
 **Attributes**:
 
 - `id` - int
-- `color` - Vector4 (RGBA)
+- `color` _Vector4_ - RGBA
 - `name` - str
 - `nodes` - List[Node]
 - `edges` - List[Edge]
-- `groupId` - Optional[int] (group id reference)
+- `groupId` _Optional[int]_ - group id reference
 
 <a name="wknml.Branchpoint"></a>
 ## Branchpoint Objects
@@ -100,8 +100,8 @@ A webKnossos branchpoint, i.e. a skeleton node with more than one outgoing edge.
 
 **Attributes**:
 
-- `id` - int (node id reference)
-- `time` - int (Unix timestamp)
+- `id` _int_ - node id reference
+- `time` _int_ - Unix timestamp
 
 <a name="wknml.Group"></a>
 ## Group Objects
@@ -129,8 +129,8 @@ A single comment belonging to a skeleton node.
 
 **Attributes**:
 
-- `node` - int (node id reference)
-- `content` - str (supports Markdown)
+- `node` _int_ - node id reference
+- `content` _str_ - supports Markdown
 
 <a name="wknml.NML"></a>
 ## NML Objects
