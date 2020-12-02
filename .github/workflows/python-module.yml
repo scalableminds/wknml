@@ -16,8 +16,8 @@ jobs:
         python -m pip install poetry
         poetry install
     - name: Check formatting
-        run: |
-          poetry run black --check wknml tests examples
+      run: |
+        poetry run black --check wknml tests examples
     - name: Test
       run: |
         mkdir -p testoutput
