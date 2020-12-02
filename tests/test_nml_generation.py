@@ -3,6 +3,7 @@ from wknml.nml_generation import generate_graph, generate_nml
 import os
 import filecmp
 
+
 def test_generate_nml():
     with open("testdata/nml_with_invalid_ids.nml", "r") as file:
         test_nml = parse_nml(file)
@@ -39,10 +40,14 @@ def test_no_default_values_written():
         with open(output_file_name, "r") as output_file:
             test_result_nml = parse_nml(output_file)
 
-            assert test_nml == test_result_nml, "The testdata file and the testoutput file do not have the same content."
+            assert (
+                test_nml == test_result_nml
+            ), "The testdata file and the testoutput file do not have the same content."
 
     # test if both files have the same content
-    assert filecmp.cmp(input_file_name, output_file_name), "The testdata and the testoutput file do not have the same content."
+    assert filecmp.cmp(
+        input_file_name, output_file_name
+    ), "The testdata and the testoutput file do not have the same content."
 
 
 if __name__ == "__main__":

@@ -47,7 +47,7 @@ n_components, labels = scipy.sparse.csgraph.connected_components(
 old_new_mapping = defaultdict(list)
 new_trees = []
 for i in range(n_components):
-    node_ids, = np.where(labels == i)
+    (node_ids,) = np.where(labels == i)
     node_ids = node_ids.tolist()
     if len(node_ids) == 1 and node_ids[0] not in all_node_ids:
         continue

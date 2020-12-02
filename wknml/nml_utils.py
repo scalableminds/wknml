@@ -27,7 +27,9 @@ def calculate_angle_between_vectors(vector1: np.ndarray, vector2: np.ndarray) ->
     return angle
 
 
-def calculate_distance_between_nodes(node1: Dict, node2: Dict, scale: np.ndarray) -> float:
+def calculate_distance_between_nodes(
+    node1: Dict, node2: Dict, scale: np.ndarray
+) -> float:
     difference_vector = get_vector_between_nodes(node1, node2, scale)
     return vector_length(difference_vector)
 
@@ -36,10 +38,14 @@ def calculate_distance_between_nodes(node1: Dict, node2: Dict, scale: np.ndarray
 # Therefore it returns a position along the vector between node1 and node2.
 # The Position along the vector is determined by the scale.
 # It is used to calculate the padding node position which is needed to ensure the maximum length.
-def get_padding_node_position(node1: Dict, node2: Dict, relative_distance_along_vector: float, scale: np.ndarray) -> List[int]:
+def get_padding_node_position(
+    node1: Dict, node2: Dict, relative_distance_along_vector: float, scale: np.ndarray
+) -> List[int]:
     node1_position = get_vector(node1, scale)
     vector_between_nodes = get_vector_between_nodes(node1, node2, scale)
-    return (node1_position + vector_between_nodes * relative_distance_along_vector) / scale
+    return (
+        node1_position + vector_between_nodes * relative_distance_along_vector
+    ) / scale
 
 
 def detect_max_node_id_from_all_graphs(graph_dict: Dict[str, nx.Graph]) -> int:
@@ -51,7 +57,11 @@ def detect_max_node_id_from_all_graphs(graph_dict: Dict[str, nx.Graph]) -> int:
     return max_id
 
 
-def approximate_minimal_edge_length(nml_or_graph: Union[NML, Tuple[Dict[str, List[nx.Graph]], Dict]], max_length: float, max_angle: float) -> Union[NML, Tuple[Dict[str, List[nx.Graph]], Dict]]:
+def approximate_minimal_edge_length(
+    nml_or_graph: Union[NML, Tuple[Dict[str, List[nx.Graph]], Dict]],
+    max_length: float,
+    max_angle: float,
+) -> Union[NML, Tuple[Dict[str, List[nx.Graph]], Dict]]:
     # it is easier to operate on a graph
     if isinstance(nml_or_graph, NML):
         nml_graph, parameter_dict = generate_graph(nml_or_graph)
@@ -60,7 +70,9 @@ def approximate_minimal_edge_length(nml_or_graph: Union[NML, Tuple[Dict[str, Lis
     scale = np.array(parameter_dict["scale"])
     for group in nml_graph.values():
         for graph in group:
-            approximate_minimal_edge_length_for_graph(graph, max_length, max_angle, scale)
+            approximate_minimal_edge_length_for_graph(
+                graph, max_length, max_angle, scale
+            )
 
     # return the same format as the input
     if isinstance(nml_or_graph, NML):
@@ -69,7 +81,9 @@ def approximate_minimal_edge_length(nml_or_graph: Union[NML, Tuple[Dict[str, Lis
         return nml_graph, parameter_dict
 
 
-def approximate_minimal_edge_length_for_graph(graph: nx.Graph, max_length: float, max_angle: float, scale: np.ndarray):
+def approximate_minimal_edge_length_for_graph(
+    graph: nx.Graph, max_length: float, max_angle: float, scale: np.ndarray
+):
     nodes_with_degree_of_two = [node for node in graph.nodes if graph.degree(node) == 2]
 
     for node_id in nodes_with_degree_of_two:
@@ -88,7 +102,9 @@ def approximate_minimal_edge_length_for_graph(graph: nx.Graph, max_length: float
             graph.add_edge(neighbors[0], neighbors[1])
 
 
-def ensure_max_edge_length(nml_or_graph: Union[NML, Tuple[Dict[str, List[nx.Graph]], Dict]], max_length: float) -> Union[NML, Tuple[Dict[str, List[nx.Graph]], Dict]]:
+def ensure_max_edge_length(
+    nml_or_graph: Union[NML, Tuple[Dict[str, List[nx.Graph]], Dict]], max_length: float
+) -> Union[NML, Tuple[Dict[str, List[nx.Graph]], Dict]]:
     # it is easier to operate on a graph
     if isinstance(nml_or_graph, NML):
         nml_graph, parameter_dict = generate_graph(nml_or_graph)
@@ -99,7 +115,9 @@ def ensure_max_edge_length(nml_or_graph: Union[NML, Tuple[Dict[str, List[nx.Grap
     next_valid_id = max_id + 1
     for group in nml_graph.values():
         for graph in group:
-            next_valid_id = ensure_max_edge_length_for_graph(graph, max_length, next_valid_id, scale)
+            next_valid_id = ensure_max_edge_length_for_graph(
+                graph, max_length, next_valid_id, scale
+            )
 
     # return the same format as the input
     if isinstance(nml_or_graph, NML):
@@ -108,7 +126,9 @@ def ensure_max_edge_length(nml_or_graph: Union[NML, Tuple[Dict[str, List[nx.Grap
         return nml_graph, parameter_dict
 
 
-def ensure_max_edge_length_for_graph(graph: nx.Graph, max_length: float, current_id: int, scale: np.ndarray) -> int:
+def ensure_max_edge_length_for_graph(
+    graph: nx.Graph, max_length: float, current_id: int, scale: np.ndarray
+) -> int:
     edges_to_be_added = []
     edges_to_be_removed = []
     nodes_to_be_added = []
@@ -125,14 +145,18 @@ def ensure_max_edge_length_for_graph(graph: nx.Graph, max_length: float, current
             previous_node_id = edge[0]
             for padding_node_number in range(1, number_of_nodes):
                 relative_distance_between_nodes = padding_node_number / number_of_nodes
-                padding_node_position = get_padding_node_position(node1, node2, relative_distance_between_nodes, scale)
+                padding_node_position = get_padding_node_position(
+                    node1, node2, relative_distance_between_nodes, scale
+                )
 
                 # attributes of the new node
                 padding_node_attributes = deepcopy(node1)
-                padding_node_attributes['position'] = (padding_node_position[0],
-                                               padding_node_position[1],
-                                               padding_node_position[2])
-                padding_node_attributes['id'] = current_id
+                padding_node_attributes["position"] = (
+                    padding_node_position[0],
+                    padding_node_position[1],
+                    padding_node_position[2],
+                )
+                padding_node_attributes["id"] = current_id
                 # add node and edge to predecessor
                 nodes_to_be_added.append(padding_node_attributes)
                 edges_to_be_added.append((previous_node_id, current_id))
@@ -146,6 +170,6 @@ def ensure_max_edge_length_for_graph(graph: nx.Graph, max_length: float, current
     graph.remove_edges_from(edges_to_be_removed)
     graph.add_edges_from(edges_to_be_added)
     for node in nodes_to_be_added:
-        graph.add_node(node['id'], **node)
+        graph.add_node(node["id"], **node)
 
     return current_id
