@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "wknml"
+version = "0.0.11"
+description = "Python package to work with webKnossos NML skeleton files"
+authors = ["scalable minds <hello@scalableminds.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.6"
+loxun = "2.0"
+networkx = "^2.5"
+numpy = "^1.19.4"
+
+[tool.poetry.dev-dependencies]
+black = "^20.8b1"
+pytest = "^6.1.2"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
