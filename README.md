@@ -11,9 +11,15 @@ To use wknml, you need to have Python 3.6+ (on the system or with Anaconda) inst
 pip install wknml
 ```
 
-## Example Snippets
-Some example to get you started. Make sure to also check the `examples` directory:
-```
+## Documentation
+
+See [docs/wknml.md](docs/wknml.md) for an API documentation.
+
+## Examples
+
+Some examples to get you started. Make sure to also check the `examples` directory:
+
+```python
 # Load an NML file
 with open("input.nml", "rb") as f:
     nml = wknml.parse_nml(f, nml)
@@ -33,7 +39,6 @@ for tree in nml.trees:
 # Write a new NML file to disk
 with open("out.nml", "wb") as f:
     wknml.write_nml(f, nml)
-```
 
 
 # Convert an NML file with unlinked nodes to one with connected trees
@@ -57,6 +62,11 @@ poetry run pytest tests
 PyPi releases are automatically pushed when creating a new Git tag/Github release. Make sure to bump the package version number manually:
 ```
 poetry version <patch, minor, major>
+```
+
+If necessary, rebuild the documentation and commit to repository:
+```
+poetry run pydoc-markdown -m wknml --render-toc > docs/wknml.md
 ```
 
 # License
