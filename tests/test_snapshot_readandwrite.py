@@ -9,10 +9,12 @@ OUTPUT_FILES = ["testoutput/dataset.nml", "testoutput/complex_dataset.nml"]
 SNAPSHOT_FILES = ["testdata/dataset.nml", "testdata/complex_dataset.nml"]
 INPUT_FILES = ["testdata/dataset.fixture.nml", "testdata/complex_dataset.fixture.nml"]
 
+
 @pytest.fixture(scope="session", autouse=True)
 def create_temp_output_directory():
     output_directory = Path("testoutput")
     output_directory.mkdir(exist_ok=True)
+
 
 def test_read_and_write_and_read():
     for i in range(0, len(INPUT_FILES)):

@@ -11,6 +11,7 @@ def create_temp_output_directory():
     output_directory = Path("testoutput")
     output_directory.mkdir(exist_ok=True)
 
+
 def test_generate_nml():
     with open("testdata/nml_with_invalid_ids.nml", "r") as file:
         test_nml = parse_nml(file)
