@@ -13,7 +13,7 @@ pip install wknml
 
 ## Example Snippets
 Some example to get you started. Make sure to also check the `examples` directory:
-```
+```python
 # Load an NML file
 with open("input.nml", "rb") as f:
     nml = wknml.parse_nml(f, nml)
@@ -33,8 +33,6 @@ for tree in nml.trees:
 # Write a new NML file to disk
 with open("out.nml", "wb") as f:
     wknml.write_nml(f, nml)
-```
-
 
 # Convert an NML file with unlinked nodes to one with connected trees
 python -m examples.fix_unlinked_nml <unlinked>.nml <fixed>.nml
