@@ -1,6 +1,8 @@
 # wknml
 [![PyPI version](https://img.shields.io/pypi/v/wknml)](https://pypi.python.org/pypi/wknml)
-[![Supported Python Versions](https://img.shields.io/pypi/pyversions/rasa.svg)](https://pypi.python.org/pypi/wknml)
+[![Supported Python Versions](https://img.shields.io/pypi/pyversions/wknml.svg)](https://pypi.python.org/pypi/wknml)
+[![Documentation](https://img.shields.io/badge/docs-passing-brightgreen.svg)](https://github.com/scalableminds/wknml/blob/master/docs/wknml.md)
+
 
 Python library for working with [webKnossos](https://webknossos.org) [NML files](https://docs.webknossos.org/reference/data_formats#nml).
 
@@ -39,11 +41,11 @@ for tree in nml.trees:
 # Write a new NML file to disk
 with open("out.nml", "wb") as f:
     wknml.write_nml(f, nml)
+```
 
-
+```shell
 # Convert an NML file with unlinked nodes to one with connected trees
 python -m examples.fix_unlinked_nml <unlinked>.nml <fixed>.nml
-
 ```
 
 # Development
