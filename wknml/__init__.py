@@ -1,103 +1,72 @@
 import xml.etree.ElementTree as ET
 from loxun import XmlWriter
 from typing import NamedTuple, List, Tuple, Optional
-import collections
 
 Vector3 = Tuple[float, float, float]
 Vector4 = Tuple[float, float, float, float]
 IntVector6 = Tuple[int, int, int, int, int, int]
 
-# From https://stackoverflow.com/a/18348004
-# Use the defaults parameter when switching to Python 3.6
-def NamedTupleWithDefaults(typename, field_names, default_values=()):
-    T = NamedTuple(typename, field_names)
-    T.__new__.__defaults__ = (None,) * len(T._fields)
-    if isinstance(default_values, collections.Mapping):
-        prototype = T(**default_values)
-    else:
-        prototype = T(*default_values)
-    T.__new__.__defaults__ = tuple(prototype)
-    return T
+
+class NMLParameters(NamedTuple):
+    name: str
+    scale: Vector3
+    offset: Optional[Vector3]
+    time: Optional[int]
+    editPosition: Optional[Vector3]
+    editRotation: Optional[Vector3]
+    zoomLevel: Optional[float]
+    taskBoundingBox: Optional[IntVector6]
+    userBoundingBox: Optional[IntVector6]
 
 
-NMLParameters = NamedTupleWithDefaults(
-    "NMLParameters",
-    [
-        ("name", str),
-        ("scale", Vector3),
-        ("offset", Optional[Vector3]),
-        ("time", Optional[int]),
-        ("editPosition", Optional[Vector3]),
-        ("editRotation", Optional[Vector3]),
-        ("zoomLevel", Optional[float]),
-        ("taskBoundingBox", Optional[IntVector6]),
-        ("userBoundingBox", Optional[IntVector6]),
-    ],
-    (None,) * 7,
-)
-Node = NamedTupleWithDefaults(
-    "Node",
-    [
-        ("id", int),
-        ("position", Vector3),
-        ("radius", Optional[float]),
-        ("rotation", Optional[Vector3]),
-        ("inVp", Optional[int]),
-        ("inMag", Optional[int]),
-        ("bitDepth", Optional[int]),
-        ("interpolation", Optional[bool]),
-        ("time", Optional[int]),
-    ],
-    (None,) * 7,
-)
-Edge = NamedTuple(
-    "Edge",
-    [
-        ("source", int),
-        ("target", int),
-    ],
-)
-Tree = NamedTupleWithDefaults(
-    "Tree",
-    [
-        ("id", int),
-        ("color", Vector4),
-        ("name", str),
-        ("nodes", List[Node]),
-        ("edges", List[Edge]),
-        ("groupId", Optional[int]),
-    ],
-    (None,) * 1,
-)
-Branchpoint = NamedTuple(
-    "Branchpoint",
-    [
-        ("id", int),
-        ("time", int),
-    ],
-)
-Group = NamedTuple(
-    "Group",
-    [("id", int), ("name", str), ("children", List["Group"])],
-)
-Comment = NamedTuple(
-    "Comment",
-    [
-        ("node", int),
-        ("content", str),
-    ],
-)
+class Node(NamedTuple):
+    id: int
+    position: Vector3
+    radius: Optional[float]
+    rotation: Optional[Vector3]
+    inVp: Optional[int]
+    inMag: Optional[int]
+    bitDepth: Optional[int]
+    interpolation: Optional[bool]
+    time: Optional[int]
 
-NML = NamedTuple(
-    "NML",
-    [
-        ("parameters", NMLParameters),
-        ("trees", List[Tree]),
-        ("branchpoints", List[Branchpoint]),
-        ("comments", List[Comment]),
-        ("groups", List[Group]),
-    ],
-)
+
+class Edge(NamedTuple):
+    source: int
+    target: int
+
+
+class Tree(NamedTuple):
+    id: int
+    color: Vector4
+    name: str
+    nodes: List[Node]
+    edges: List[Edge]
+    groupId: Optional[int]
+
+
+class Branchpoint(NamedTuple):
+    id: int
+    time: int
+
+
+class Group(NamedTuple):
+    id: int
+    name: str
+    children: List["Group"]
+
+
+class Comment(NamedTuple):
+    node: int
+    content: str
+
+
+class NML(NamedTuple):
+    parameters: NMLParameters
+    trees: List[Tree]
+    branchpoints: List[Branchpoint]
+    comments: List[Comment]
+    groups: List[Group]
 
 
 def parse_bounding_box(nml_parameters, prefix):
