@@ -11,11 +11,30 @@ To use wknml, you need to have Python 3.6+ (on the system or with Anaconda) inst
 pip install wknml
 ```
 
-## Snippets
+## Example Snippets
+Some example to get you started. Make sure to also check the `examples` directory:
 ```
-# Check out the repository and go into it
-git clone git@github.com:scalableminds/wknml.git
-cd wknml
+# Load an NML file
+with open("input.nml", "rb") as f:
+    nml = wknml.parse_nml(f, nml)
+
+# Access the most important properties
+print(nml.parameters)
+print(nml.trees)
+print(nml.branchpoints)
+print(nml.comments)
+print(nml.groups)
+
+# Iterate over all nodes
+for tree in nml.trees:
+    for node in tree.nodes:
+        print(tree, node)
+
+# Write a new NML file to disk
+with open("out.nml", "wb") as f:
+    wknml.write_nml(f, nml)
+```
+
 
 # Convert an NML file with unlinked nodes to one with connected trees
 python -m examples.fix_unlinked_nml <unlinked>.nml <fixed>.nml
