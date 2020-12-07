@@ -21,7 +21,6 @@ jobs:
         poetry install
  
     - name: Build and publish
-      if: startsWith(github.event.ref, 'refs/tags')
       env:
         PYPI_SCM_USERNAME: ${{ secrets.PYPI_USERNAME }}
         PYPI_SCM_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
