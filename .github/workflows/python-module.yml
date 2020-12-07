@@ -26,6 +26,7 @@ jobs:
       run: |
         poetry run pydoc-markdown -m wknml --render-toc > docs/ci_test.md
         diff docs/ci_test.md docs/wknml.md
+        rm docs/ci_test.md
     - name: Build and publish
       if: startsWith(github.event.ref, 'refs/tags')
       env:
