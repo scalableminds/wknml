@@ -19,101 +19,99 @@ def NamedTupleWithDefaults(typename, field_names, default_values=()):
     T.__new__.__defaults__ = tuple(prototype)
     return T
 
+
 NMLParameters = NamedTupleWithDefaults(
-  "NMLParameters",
-  [
-    ("name", str),
-    ("scale", Vector3),
-    ("offset", Optional[Vector3]),
-    ("time", Optional[int]),
-    ("editPosition", Optional[Vector3]),
-    ("editRotation", Optional[Vector3]),
-    ("zoomLevel", Optional[float]),
-    ("taskBoundingBox", Optional[IntVector6]),
-    ("userBoundingBox", Optional[IntVector6]),
-  ],
-  (None,) * 7
+    "NMLParameters",
+    [
+        ("name", str),
+        ("scale", Vector3),
+        ("offset", Optional[Vector3]),
+        ("time", Optional[int]),
+        ("editPosition", Optional[Vector3]),
+        ("editRotation", Optional[Vector3]),
+        ("zoomLevel", Optional[float]),
+        ("taskBoundingBox", Optional[IntVector6]),
+        ("userBoundingBox", Optional[IntVector6]),
+    ],
+    (None,) * 7,
 )
 Node = NamedTupleWithDefaults(
-  "Node",
-  [
-    ("id", int),
-    ("position", Vector3),
-    ("radius", Optional[float]),
-    ("rotation", Optional[Vector3]),
-    ("inVp", Optional[int]),
-    ("inMag", Optional[int]),
-    ("bitDepth", Optional[int]),
-    ("interpolation", Optional[bool]),
-    ("time", Optional[int]),
-  ],
-  (None,) * 7
+    "Node",
+    [
+        ("id", int),
+        ("position", Vector3),
+        ("radius", Optional[float]),
+        ("rotation", Optional[Vector3]),
+        ("inVp", Optional[int]),
+        ("inMag", Optional[int]),
+        ("bitDepth", Optional[int]),
+        ("interpolation", Optional[bool]),
+        ("time", Optional[int]),
+    ],
+    (None,) * 7,
 )
 Edge = NamedTuple(
-  "Edge",
-  [
-    ("source", int),
-    ("target", int),
-  ],
+    "Edge",
+    [
+        ("source", int),
+        ("target", int),
+    ],
 )
 Tree = NamedTupleWithDefaults(
-  "Tree",
-  [
-    ("id", int),
-    ("color", Vector4),
-    ("name", str),
-    ("nodes", List[Node]),
-    ("edges", List[Edge]),
-    ("groupId", Optional[int]),
-  ],
-  (None,) * 1
+    "Tree",
+    [
+        ("id", int),
+        ("color", Vector4),
+        ("name", str),
+        ("nodes", List[Node]),
+        ("edges", List[Edge]),
+        ("groupId", Optional[int]),
+    ],
+    (None,) * 1,
 )
 Branchpoint = NamedTuple(
-  "Branchpoint",
-  [
-    ("id", int),
-    ("time", int),
-  ],
+    "Branchpoint",
+    [
+        ("id", int),
+        ("time", int),
+    ],
 )
 Group = NamedTuple(
-  "Group",
-  [
-    ("id", int),
-    ("name", str),
-    ("children", List["Group"])
-  ],
+    "Group",
+    [("id", int), ("name", str), ("children", List["Group"])],
 )
 Comment = NamedTuple(
-  "Comment",
-  [
-    ("node", int),
-    ("content", str),
-  ],
+    "Comment",
+    [
+        ("node", int),
+        ("content", str),
+    ],
 )
 
 NML = NamedTuple(
-  "NML",
-  [
-    ("parameters", NMLParameters),
-    ("trees", List[Tree]),
-    ("branchpoints", List[Branchpoint]),
-    ("comments", List[Comment]),
-    ("groups", List[Group]),
-  ],
+    "NML",
+    [
+        ("parameters", NMLParameters),
+        ("trees", List[Tree]),
+        ("branchpoints", List[Branchpoint]),
+        ("comments", List[Comment]),
+        ("groups", List[Group]),
+    ],
 )
+
 
 def parse_bounding_box(nml_parameters, prefix):
     boundingBox = None
     bboxName = prefix + "BoundingBox"
     if nml_parameters.find(bboxName) is not None:
-      boundingBox = (
-        int(nml_parameters.find(bboxName).get("topLeftX")),
-        int(nml_parameters.find(bboxName).get("topLeftY")),
-        int(nml_parameters.find(bboxName).get("topLeftZ")),
-        int(nml_parameters.find(bboxName).get("width")),
-        int(nml_parameters.find(bboxName).get("height")),
-        int(nml_parameters.find(bboxName).get("depth")),
-      )
+        boundingBox = (
+            int(nml_parameters.find(bboxName).get("topLeftX")),
+            int(nml_parameters.find(bboxName).get("topLeftY")),
+            int(nml_parameters.find(bboxName).get("topLeftZ")),
+            int(nml_parameters.find(bboxName).get("width")),
+            int(nml_parameters.find(bboxName).get("height")),
+            int(nml_parameters.find(bboxName).get("depth")),
+        )
     return boundingBox
 
 
@@ -136,15 +134,15 @@ def parse_parameters(nml_parameters):
 
     editPosition = None
     if nml_parameters.find("editPosition") is not None:
-      editPosition = (
-        float(nml_parameters.find("editPosition").get("x")),
-        float(nml_parameters.find("editPosition").get("y")),
-        float(nml_parameters.find("editPosition").get("z")),
-      )
+        editPosition = (
+            float(nml_parameters.find("editPosition").get("x")),
+            float(nml_parameters.find("editPosition").get("y")),
+            float(nml_parameters.find("editPosition").get("z")),
+        )
 
     time = None
     if nml_parameters.find("time") is not None:
-      time = int(nml_parameters.find("time").get("ms"))
+        time = int(nml_parameters.find("time").get("ms"))
 
     zoomLevel = None
     if nml_parameters.find("zoomLevel") is not None:
@@ -173,13 +171,17 @@ def parse_parameters(nml_parameters):
 def parse_node(nml_node):
     rotation = None
     if nml_node.get("rotX") is not None:
-        rotation = (float(nml_node.get("rotX")),
-        float(nml_node.get("rotY")),
-        float(nml_node.get("rotZ")))
+        rotation = (
+            float(nml_node.get("rotX")),
+            float(nml_node.get("rotY")),
+            float(nml_node.get("rotZ")),
+        )
 
     return Node(
         id=int(nml_node.get("id")),
-        radius=float(nml_node.get("radius")) if nml_node.get("radius") is not None else None,
+        radius=float(nml_node.get("radius"))
+        if nml_node.get("radius") is not None
+        else None,
         position=(
             float(nml_node.get("x")),
             float(nml_node.get("y")),
@@ -188,8 +190,12 @@ def parse_node(nml_node):
         rotation=rotation,
         inVp=int(nml_node.get("inVp")) if nml_node.get("inVp") is not None else None,
         inMag=int(nml_node.get("inMag")) if nml_node.get("inMag") is not None else None,
-        bitDepth=int(nml_node.get("bitDepth")) if nml_node.get("bitDepth") is not None else None,
-        interpolation=bool(nml_node.get("interpolation")) if nml_node.get("interpolation") is not None else None,
+        bitDepth=int(nml_node.get("bitDepth"))
+        if nml_node.get("bitDepth") is not None
+        else None,
+        interpolation=bool(nml_node.get("interpolation"))
+        if nml_node.get("interpolation") is not None
+        else None,
         time=int(nml_node.get("time")) if nml_node.get("time") is not None else None,
     )
 
@@ -236,11 +242,18 @@ def parse_tree(nml_tree):
 
 
 def parse_branchpoint(nml_branchpoint):
-    return Branchpoint(int(nml_branchpoint.get("id")), int(nml_branchpoint.get("time")) if nml_branchpoint.get("time") is not None else None)
+    return Branchpoint(
+        int(nml_branchpoint.get("id")),
+        int(nml_branchpoint.get("time"))
+        if nml_branchpoint.get("time") is not None
+        else None,
+    )
 
 
 def parse_comment(nml_comment):
-    return Comment(int(nml_comment.get("node")), nml_comment.get("content", default=None))
+    return Comment(
+        int(nml_comment.get("node")), nml_comment.get("content", default=None)
+    )
 
 
 def parse_group(nml_group):
@@ -264,10 +277,14 @@ def parse_nml(file):
                 current_tree = parse_tree(elem)
                 trees.append(current_tree)
             elif elem.tag == "node":
-                assert current_tree is not None, "<node ...> tag needs to be child of a <thing ...> tag."
+                assert (
+                    current_tree is not None
+                ), "<node ...> tag needs to be child of a <thing ...> tag."
                 current_tree.nodes.append(parse_node(elem))
             elif elem.tag == "edge":
-                assert current_tree is not None, "<edge ...> tag needs to be child of a <thing ...> tag."
+                assert (
+                    current_tree is not None
+                ), "<edge ...> tag needs to be child of a <thing ...> tag."
                 current_tree.edges.append(parse_edge(elem))
             elif elem.tag == "branchpoint":
                 branchpoints.append(parse_branchpoint(elem))
@@ -306,53 +323,68 @@ def dump_bounding_box(xf, parameters, prefix):
     parametersBox = getattr(parameters, bboxName)
 
     if parametersBox is not None:
-        xf.tag(bboxName, {
-            "topLeftX": str(parametersBox[0]),
-            "topLeftY": str(parametersBox[1]),
-            "topLeftZ": str(parametersBox[2]),
-            "width": str(parametersBox[3]),
-            "height": str(parametersBox[4]),
-            "depth": str(parametersBox[5]),
-        })
+        xf.tag(
+            bboxName,
+            {
+                "topLeftX": str(parametersBox[0]),
+                "topLeftY": str(parametersBox[1]),
+                "topLeftZ": str(parametersBox[2]),
+                "width": str(parametersBox[3]),
+                "height": str(parametersBox[4]),
+                "depth": str(parametersBox[5]),
+            },
+        )
 
 
 def dump_parameters(xf, parameters):
     xf.startTag("parameters")
     xf.tag("experiment", {"name": parameters.name})
-    xf.tag("scale", {
-        "x": str(parameters.scale[0]),
-        "y": str(parameters.scale[1]),
-        "z": str(parameters.scale[2]),
-    })
+    xf.tag(
+        "scale",
+        {
+            "x": str(parameters.scale[0]),
+            "y": str(parameters.scale[1]),
+            "z": str(parameters.scale[2]),
+        },
+    )
 
     if parameters.offset is not None:
-        xf.tag("offset", {
-            "x": str(parameters.offset[0]),
-            "y": str(parameters.offset[1]),
-            "z": str(parameters.offset[2]),
-        })
+        xf.tag(
+            "offset",
+            {
+                "x": str(parameters.offset[0]),
+                "y": str(parameters.offset[1]),
+                "z": str(parameters.offset[2]),
+            },
+        )
 
     if parameters.time is not None:
         xf.tag("time", {"ms": str(parameters.time)})
     if parameters.editPosition is not None:
-        xf.tag("editPosition", {
-            "x": str(parameters.editPosition[0]),
-            "y": str(parameters.editPosition[1]),
-            "z": str(parameters.editPosition[2]),
-        })
+        xf.tag(
+            "editPosition",
+            {
+                "x": str(parameters.editPosition[0]),
+                "y": str(parameters.editPosition[1]),
+                "z": str(parameters.editPosition[2]),
+            },
+        )
     if parameters.editRotation is not None:
-        xf.tag("editRotation", {
-            "xRot": str(parameters.editRotation[0]),
-            "yRot": str(parameters.editRotation[1]),
-            "zRot": str(parameters.editRotation[2]),
-        })
+        xf.tag(
+            "editRotation",
+            {
+                "xRot": str(parameters.editRotation[0]),
+                "yRot": str(parameters.editRotation[1]),
+                "zRot": str(parameters.editRotation[2]),
+            },
+        )
     if parameters.zoomLevel is not None:
         xf.tag("zoomLevel", {"zoom": str(parameters.zoomLevel)})
 
     dump_bounding_box(xf, parameters, "task")
     dump_bounding_box(xf, parameters, "user")
 
-    xf.endTag() # parameters
+    xf.endTag()  # parameters
 
 
 def dump_node(xf, node):
@@ -403,18 +435,20 @@ def dump_tree(xf, tree):
         "color.a": str(tree.color[3]),
         "name": tree.name,
     }
-    
+
     if tree.groupId is not None:
         attributes["groupId"] = str(tree.groupId)
-    
+
     xf.startTag("thing", attributes)
     xf.startTag("nodes")
-    for n in tree.nodes: dump_node(xf, n)
-    xf.endTag() # nodes
+    for n in tree.nodes:
+        dump_node(xf, n)
+    xf.endTag()  # nodes
     xf.startTag("edges")
-    for e in tree.edges: dump_edge(xf, e)
-    xf.endTag() # edges
-    xf.endTag() # thing
+    for e in tree.edges:
+        dump_edge(xf, e)
+    xf.endTag()  # edges
+    xf.endTag()  # thing
 
 
 def dump_branchpoint(xf, branchpoint):
@@ -423,45 +457,44 @@ def dump_branchpoint(xf, branchpoint):
             "branchpoint", {"id": str(branchpoint.id), "time": str(branchpoint.time)}
         )
     else:
-        xf.tag(
-            "branchpoint", {"id": str(branchpoint.id)}
-        )
+        xf.tag("branchpoint", {"id": str(branchpoint.id)})
 
 
 def dump_comment(xf, comment):
     if comment.content is not None:
-        xf.tag(
-            "comment", {"node": str(comment.node), "content": comment.content}
-        )
+        xf.tag("comment", {"node": str(comment.node), "content": comment.content})
     else:
-        xf.tag(
-            "comment", {"node": str(comment.node)}
-        )
+        xf.tag("comment", {"node": str(comment.node)})
 
 
 def dump_group(xf, group):
     xf.startTag("group", {"id": str(group.id), "name": group.name})
-    for g in group.children: dump_group(xf, g)
-    xf.endTag() # group
+    for g in group.children:
+        dump_group(xf, g)
+    xf.endTag()  # group
 
 
 def dump_nml(xf, nml: NML):
     xf.startTag("things")
     dump_parameters(xf, nml.parameters)
-    for t in nml.trees: dump_tree(xf, t)
+    for t in nml.trees:
+        dump_tree(xf, t)
 
     xf.startTag("branchpoints")
-    for b in nml.branchpoints: dump_branchpoint(xf, b)
-    xf.endTag() # branchpoints
+    for b in nml.branchpoints:
+        dump_branchpoint(xf, b)
+    xf.endTag()  # branchpoints
 
     xf.startTag("comments")
-    for c in nml.comments: dump_comment(xf, c)
-    xf.endTag() # comments
+    for c in nml.comments:
+        dump_comment(xf, c)
+    xf.endTag()  # comments
 
     xf.startTag("groups")
-    for g in nml.groups: dump_group(xf, g)
-    xf.endTag() # groups
-    xf.endTag() # things
+    for g in nml.groups:
+        dump_group(xf, g)
+    xf.endTag()  # groups
+    xf.endTag()  # things
 
 
 def write_nml(file, nml: NML):

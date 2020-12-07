@@ -1,10 +1,19 @@
-import wknml
 import pickle
-import filecmp
+from pathlib import Path
 
-OUTPUT_FILES = ['testoutput/dataset.nml', 'testoutput/complex_dataset.nml']
-SNAPSHOT_FILES = ['testdata/dataset.nml', 'testdata/complex_dataset.nml']
-INPUT_FILES = ['testdata/dataset.fixture.nml', 'testdata/complex_dataset.fixture.nml']
+import wknml
+import filecmp
+import pytest
+
+OUTPUT_FILES = ["testoutput/dataset.nml", "testoutput/complex_dataset.nml"]
+SNAPSHOT_FILES = ["testdata/dataset.nml", "testdata/complex_dataset.nml"]
+INPUT_FILES = ["testdata/dataset.fixture.nml", "testdata/complex_dataset.fixture.nml"]
+
+
+@pytest.fixture(scope="session", autouse=True)
+def create_temp_output_directory():
+    output_directory = Path("testoutput")
+    output_directory.mkdir(exist_ok=True)
 
 
 def test_read_and_write_and_read():
@@ -12,7 +21,7 @@ def test_read_and_write_and_read():
         input_file = INPUT_FILES[i]
         output_file = OUTPUT_FILES[i]
         first = wknml.parse_nml(input_file)
-        with open(output_file, 'wb') as f:
+        with open(output_file, "wb") as f:
             wknml.write_nml(f, first)
         second = wknml.parse_nml(output_file)
         assert first == second
@@ -24,9 +33,9 @@ def test_snapshot_read_and_compare_pickle():
         snapshot_file = SNAPSHOT_FILES[i]
         output_file = OUTPUT_FILES[i]
         parsed = wknml.parse_nml(input_file)
-        with open(output_file + '.pickle.cmp', 'wb') as f:
+        with open(output_file + ".pickle.cmp", "wb") as f:
             pickle.dump(parsed, f)
-        assert filecmp.cmp(snapshot_file + '.pickle', output_file + '.pickle.cmp')
+        assert filecmp.cmp(snapshot_file + ".pickle", output_file + ".pickle.cmp")
 
 
 def test_snapshot_read_and_compare_nml():
@@ -35,6 +44,6 @@ def test_snapshot_read_and_compare_nml():
         snapshot_file = SNAPSHOT_FILES[i]
         output_file = OUTPUT_FILES[i]
         parsed = wknml.parse_nml(input_file)
-        with open(output_file, 'wb') as f:
+        with open(output_file, "wb") as f:
             wknml.write_nml(f, parsed)
-        assert filecmp.cmp(snapshot_file + '.snapshot', output_file)
+        assert filecmp.cmp(snapshot_file + ".snapshot", output_file)
