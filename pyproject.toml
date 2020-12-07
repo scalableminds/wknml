@@ -1,8 +1,10 @@
 [tool.poetry]
 name = "wknml"
-version = "1.0.0"
+version = "1.0.1"
 description = "Python package to work with webKnossos NML skeleton files"
 authors = ["scalable minds <hello@scalableminds.com>"]
+readme = "README.md"
+repository = "https://github.com/scalableminds/wknml"
 license = "MIT"
 
 [tool.poetry.dependencies]
