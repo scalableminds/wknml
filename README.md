@@ -1,13 +1,14 @@
 # wknml
 [![PyPI version](https://img.shields.io/pypi/v/wknml)](https://pypi.python.org/pypi/wknml)
 [![Supported Python Versions](https://img.shields.io/pypi/pyversions/wknml.svg)](https://pypi.python.org/pypi/wknml)
+[![Build Status](https://img.shields.io/github/workflow/status/scalableminds/wknml/Test%20Python%20Package/master)](https://github.com/scalableminds/wknml/actions?query=workflow%3A%22Test+Python+Package%22)
 [![Documentation](https://img.shields.io/badge/docs-passing-brightgreen.svg)](https://github.com/scalableminds/wknml/blob/master/docs/wknml.md)
 [![Code Style](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-Python library for working with [webKnossos](https://webknossos.org) [NML files](https://docs.webknossos.org/reference/data_formats#nml).
+Python library for working with [webKnossos](https://webknossos.org) [skeleton annotation files (NML)](https://docs.webknossos.org/reference/data_formats#nml).
 
 ## Installation
-To use wknml, you need to have Python 3.6+ (on the system or with Anaconda) installed.
+wknml requires Python 3.6+
 
 ```
 pip install wknml
