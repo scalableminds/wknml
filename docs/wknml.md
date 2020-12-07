@@ -170,8 +170,10 @@ Reads a webKnossos NML skeleton file from disk, parses it and returns an NML Pyt
 
 **Example**:
 
+  ```
   with open("input.nml", "rb") as f:
   nml = wknml.parse_nml(f, nml)
+  ```
 
 <a name="wknml.write_nml"></a>
 #### write\_nml
@@ -190,6 +192,8 @@ Writes an NML object to a file on disk.
 
 **Example**:
 
+  ```
   with open("out.nml", "wb") as f:
   wknml.write_nml(f, nml)
+  ```
 

@@ -326,8 +326,10 @@ def parse_nml(file: BinaryIO) -> NML:
         NML: A webKnossos skeleton annotation as Python NML object
 
     Example:
+        ```
         with open("input.nml", "rb") as f:
             nml = wknml.parse_nml(f, nml)
+        ```
     """
 
     parameters = None
@@ -570,13 +572,15 @@ def write_nml(file: BinaryIO, nml: NML):
     """
     Writes an NML object to a file on disk.
 
-    Arguments:
-        file (BinaryIO): A Python file handle
-        nml (NML): A NML object that should be persisted to disk
+        Arguments:
+            file (BinaryIO): A Python file handle
+            nml (NML): A NML object that should be persisted to disk
 
     Example:
+        ```
         with open("out.nml", "wb") as f:
             wknml.write_nml(f, nml)
+        ```
     """
     with XmlWriter(file) as xf:
         __dump_nml(xf, nml)
