@@ -1,106 +1,161 @@
 import xml.etree.ElementTree as ET
 from loxun import XmlWriter
-from typing import NamedTuple, List, Tuple, Optional
-import collections
+from typing import BinaryIO, NamedTuple, List, Tuple, Optional
 
 Vector3 = Tuple[float, float, float]
 Vector4 = Tuple[float, float, float, float]
 IntVector6 = Tuple[int, int, int, int, int, int]
 
-# From https://stackoverflow.com/a/18348004
-# Use the defaults parameter when switching to Python 3.6
-def NamedTupleWithDefaults(typename, field_names, default_values=()):
-    T = NamedTuple(typename, field_names)
-    T.__new__.__defaults__ = (None,) * len(T._fields)
-    if isinstance(default_values, collections.Mapping):
-        prototype = T(**default_values)
-    else:
-        prototype = T(*default_values)
-    T.__new__.__defaults__ = tuple(prototype)
-    return T
+
+class NMLParameters(NamedTuple):
+    """
+    Contains common metadata for NML files
+
+    Attributes:
+        name: str
+        scale: Vector3
+        offset: Optional[Vector3]
+        time: Optional[int]
+        editPosition: Optional[Vector3]
+        editRotation: Optional[Vector3]
+        zoomLevel: Optional[float]
+        taskBoundingBox: Optional[IntVector6]
+        userBoundingBox: Optional[IntVector6]
+    """
+
+    name: str
+    scale: Vector3
+    offset: Optional[Vector3]
+    time: Optional[int]
+    editPosition: Optional[Vector3]
+    editRotation: Optional[Vector3]
+    zoomLevel: Optional[float]
+    taskBoundingBox: Optional[IntVector6]
+    userBoundingBox: Optional[IntVector6]
 
 
-NMLParameters = NamedTupleWithDefaults(
-    "NMLParameters",
-    [
-        ("name", str),
-        ("scale", Vector3),
-        ("offset", Optional[Vector3]),
-        ("time", Optional[int]),
-        ("editPosition", Optional[Vector3]),
-        ("editRotation", Optional[Vector3]),
-        ("zoomLevel", Optional[float]),
-        ("taskBoundingBox", Optional[IntVector6]),
-        ("userBoundingBox", Optional[IntVector6]),
-    ],
-    (None,) * 7,
-)
-Node = NamedTupleWithDefaults(
-    "Node",
-    [
-        ("id", int),
-        ("position", Vector3),
-        ("radius", Optional[float]),
-        ("rotation", Optional[Vector3]),
-        ("inVp", Optional[int]),
-        ("inMag", Optional[int]),
-        ("bitDepth", Optional[int]),
-        ("interpolation", Optional[bool]),
-        ("time", Optional[int]),
-    ],
-    (None,) * 7,
-)
-Edge = NamedTuple(
-    "Edge",
-    [
-        ("source", int),
-        ("target", int),
-    ],
-)
-Tree = NamedTupleWithDefaults(
-    "Tree",
-    [
-        ("id", int),
-        ("color", Vector4),
-        ("name", str),
-        ("nodes", List[Node]),
-        ("edges", List[Edge]),
-        ("groupId", Optional[int]),
-    ],
-    (None,) * 1,
-)
-Branchpoint = NamedTuple(
-    "Branchpoint",
-    [
-        ("id", int),
-        ("time", int),
-    ],
-)
-Group = NamedTuple(
-    "Group",
-    [("id", int), ("name", str), ("children", List["Group"])],
-)
-Comment = NamedTuple(
-    "Comment",
-    [
-        ("node", int),
-        ("content", str),
-    ],
-)
+class Node(NamedTuple):
+    """
+    A webKnossos skeleton node annotation object.
 
-NML = NamedTuple(
-    "NML",
-    [
-        ("parameters", NMLParameters),
-        ("trees", List[Tree]),
-        ("branchpoints", List[Branchpoint]),
-        ("comments", List[Comment]),
-        ("groups", List[Group]),
-    ],
-)
+    Attributes:
+        id: int
+        position: Vector3
+        radius: Optional[float]
+        rotation: Optional[Vector3]
+        inVp: Optional[int]
+        inMag: Optional[int]
+        bitDepth: Optional[int]
+        interpolation: Optional[bool]
+        time: Optional[int]
+    """
+
+    id: int
+    position: Vector3
+    radius: Optional[float]
+    rotation: Optional[Vector3]
+    inVp: Optional[int]
+    inMag: Optional[int]
+    bitDepth: Optional[int]
+    interpolation: Optional[bool]
+    time: Optional[int]
 
 
-def parse_bounding_box(nml_parameters, prefix):
+class Edge(NamedTuple):
+    """
+    A webKnossos skeleton edge.
+
+    Attributes:
+        source (int): node id reference
+        target (int): node id reference
+    """
+
+    source: int
+    target: int
+
+
+class Tree(NamedTuple):
+    """
+    A webKnossos skeleton (tree) object. A graph structure consisting of nodes and edges.
+
+    Attributes:
+        id: int
+        color (Vector4): RGBA
+        name: str
+        nodes: List[Node]
+        edges: List[Edge]
+        groupId (Optional[int]): group id reference
+    """
+
+    id: int
+    color: Vector4
+    name: str
+    nodes: List[Node]
+    edges: List[Edge]
+    groupId: Optional[int]
+
+
+class Branchpoint(NamedTuple):
+    """
+    A webKnossos branchpoint, i.e. a skeleton node with more than one outgoing edge.
+
+    Attributes:
+        id (int): node id reference
+        time (int): Unix timestamp
+    """
+
+    id: int
+    time: int
+
+
+class Group(NamedTuple):
+    """
+    A container to group several skeletons (trees) together. Mostly for cosmetic or organizational purposes.
+
+    Attributes:
+        id: int
+        name: str
+        children: List[Group]
+    """
+
+    id: int
+    name: str
+    children: List["Group"]
+
+
+class Comment(NamedTuple):
+    """
+    A single comment belonging to a skeleton node.
+
+    Attributes:
+        node (int): node id reference
+        content (str): supports Markdown
+    """
+
+    node: int
+    content: str
+
+
+class NML(NamedTuple):
+    """
+    A complete webKnossos skeleton annotation object contain one or more skeletons (trees).
+
+    Attributes:
+        parameters: NMLParameters
+        trees: List[Tree]
+        branchpoints: List[Branchpoint]
+        comments: List[Comment]
+        groups: List[Group]
+    """
+
+    parameters: NMLParameters
+    trees: List[Tree]
+    branchpoints: List[Branchpoint]
+    comments: List[Comment]
+    groups: List[Group]
+
+
+def __parse_bounding_box(nml_parameters, prefix):
     boundingBox = None
     bboxName = prefix + "BoundingBox"
     if nml_parameters.find(bboxName) is not None:
@@ -115,7 +170,7 @@ def parse_bounding_box(nml_parameters, prefix):
     return boundingBox
 
 
-def parse_parameters(nml_parameters):
+def __parse_parameters(nml_parameters):
     offset = None
     if nml_parameters.find("offset") is not None:
         offset = (
@@ -148,8 +203,8 @@ def parse_parameters(nml_parameters):
     if nml_parameters.find("zoomLevel") is not None:
         zoomLevel = nml_parameters.find("zoomLevel").get("zoom")
 
-    taskBoundingBox = parse_bounding_box(nml_parameters, "task")
-    userBoundingBox = parse_bounding_box(nml_parameters, "user")
+    taskBoundingBox = __parse_bounding_box(nml_parameters, "task")
+    userBoundingBox = __parse_bounding_box(nml_parameters, "user")
 
     return NMLParameters(
         name=nml_parameters.find("experiment").get("name"),
@@ -168,7 +223,7 @@ def parse_parameters(nml_parameters):
     )
 
 
-def parse_node(nml_node):
+def __parse_node(nml_node):
     rotation = None
     if nml_node.get("rotX") is not None:
         rotation = (
@@ -200,11 +255,11 @@ def parse_node(nml_node):
     )
 
 
-def parse_edge(nml_edge):
+def __parse_edge(nml_edge):
     return Edge(source=int(nml_edge.get("source")), target=int(nml_edge.get("target")))
 
 
-def parse_tree(nml_tree):
+def __parse_tree(nml_tree):
     name = None
     if "comment" in nml_tree.attrib:
         name = nml_tree.get("comment")
@@ -241,7 +296,7 @@ def parse_tree(nml_tree):
     )
 
 
-def parse_branchpoint(nml_branchpoint):
+def __parse_branchpoint(nml_branchpoint):
     return Branchpoint(
         int(nml_branchpoint.get("id")),
         int(nml_branchpoint.get("time"))
@@ -250,17 +305,33 @@ def parse_branchpoint(nml_branchpoint):
     )
 
 
-def parse_comment(nml_comment):
+def __parse_comment(nml_comment):
     return Comment(
         int(nml_comment.get("node")), nml_comment.get("content", default=None)
     )
 
 
-def parse_group(nml_group):
+def __parse_group(nml_group):
     return Group(int(nml_group.get("id")), nml_group.get("name", default=None), [])
 
 
-def parse_nml(file):
+def parse_nml(file: BinaryIO) -> NML:
+    """
+    Reads a webKnossos NML skeleton file from disk, parses it and returns an NML Python object
+
+    Attributes:
+        file (BinaryIO): A Python file handle
+
+    Return:
+        NML: A webKnossos skeleton annotation as Python NML object
+
+    Example:
+        ```
+        with open("input.nml", "rb") as f:
+            nml = wknml.parse_nml(f, nml)
+        ```
+    """
+
     parameters = None
     trees = []
     branchpoints = []
@@ -274,29 +345,29 @@ def parse_nml(file):
         if event == "start":
             element_stack.append(elem)
             if elem.tag == "thing":
-                current_tree = parse_tree(elem)
+                current_tree = __parse_tree(elem)
                 trees.append(current_tree)
             elif elem.tag == "node":
                 assert (
                     current_tree is not None
                 ), "<node ...> tag needs to be child of a <thing ...> tag."
-                current_tree.nodes.append(parse_node(elem))
+                current_tree.nodes.append(__parse_node(elem))
             elif elem.tag == "edge":
                 assert (
                     current_tree is not None
                 ), "<edge ...> tag needs to be child of a <thing ...> tag."
-                current_tree.edges.append(parse_edge(elem))
+                current_tree.edges.append(__parse_edge(elem))
             elif elem.tag == "branchpoint":
-                branchpoints.append(parse_branchpoint(elem))
+                branchpoints.append(__parse_branchpoint(elem))
             elif elem.tag == "comment":
-                comments.append(parse_comment(elem))
+                comments.append(__parse_comment(elem))
             elif elem.tag == "group":
-                group = parse_group(elem)
+                group = __parse_group(elem)
                 group_stack[-1].children.append(group)
                 group_stack.append(group)
         elif event == "end":
             if elem.tag == "parameters":
-                parameters = parse_parameters(elem)
+                parameters = __parse_parameters(elem)
             elif elem.tag == "thing":
                 current_tree = None
             elif elem.tag == "group":
@@ -318,7 +389,7 @@ def parse_nml(file):
     )
 
 
-def dump_bounding_box(xf, parameters, prefix):
+def __dump_bounding_box(xf, parameters, prefix):
     bboxName = prefix + "BoundingBox"
     parametersBox = getattr(parameters, bboxName)
 
@@ -336,7 +407,7 @@ def dump_bounding_box(xf, parameters, prefix):
         )
 
 
-def dump_parameters(xf, parameters):
+def __dump_parameters(xf, parameters):
     xf.startTag("parameters")
     xf.tag("experiment", {"name": parameters.name})
     xf.tag(
@@ -381,13 +452,13 @@ def dump_parameters(xf, parameters):
     if parameters.zoomLevel is not None:
         xf.tag("zoomLevel", {"zoom": str(parameters.zoomLevel)})
 
-    dump_bounding_box(xf, parameters, "task")
-    dump_bounding_box(xf, parameters, "user")
+    __dump_bounding_box(xf, parameters, "task")
+    __dump_bounding_box(xf, parameters, "user")
 
     xf.endTag()  # parameters
 
 
-def dump_node(xf, node):
+def __dump_node(xf, node):
 
     attributes = {
         "id": str(node.id),
@@ -422,11 +493,11 @@ def dump_node(xf, node):
     xf.tag("node", attributes)
 
 
-def dump_edge(xf, edge):
+def __dump_edge(xf, edge):
     xf.tag("edge", {"source": str(edge.source), "target": str(edge.target)})
 
 
-def dump_tree(xf, tree):
+def __dump_tree(xf, tree):
     attributes = {
         "id": str(tree.id),
         "color.r": str(tree.color[0]),
@@ -442,16 +513,16 @@ def dump_tree(xf, tree):
     xf.startTag("thing", attributes)
     xf.startTag("nodes")
     for n in tree.nodes:
-        dump_node(xf, n)
+        __dump_node(xf, n)
     xf.endTag()  # nodes
     xf.startTag("edges")
     for e in tree.edges:
-        dump_edge(xf, e)
+        __dump_edge(xf, e)
     xf.endTag()  # edges
     xf.endTag()  # thing
 
 
-def dump_branchpoint(xf, branchpoint):
+def __dump_branchpoint(xf, branchpoint):
     if branchpoint.time is not None:
         xf.tag(
             "branchpoint", {"id": str(branchpoint.id), "time": str(branchpoint.time)}
@@ -460,43 +531,56 @@ def dump_branchpoint(xf, branchpoint):
         xf.tag("branchpoint", {"id": str(branchpoint.id)})
 
 
-def dump_comment(xf, comment):
+def __dump_comment(xf, comment):
     if comment.content is not None:
         xf.tag("comment", {"node": str(comment.node), "content": comment.content})
     else:
         xf.tag("comment", {"node": str(comment.node)})
 
 
-def dump_group(xf, group):
+def __dump_group(xf, group):
     xf.startTag("group", {"id": str(group.id), "name": group.name})
     for g in group.children:
-        dump_group(xf, g)
+        __dump_group(xf, g)
     xf.endTag()  # group
 
 
-def dump_nml(xf, nml: NML):
+def __dump_nml(xf, nml: NML):
     xf.startTag("things")
-    dump_parameters(xf, nml.parameters)
+    __dump_parameters(xf, nml.parameters)
     for t in nml.trees:
-        dump_tree(xf, t)
+        __dump_tree(xf, t)
 
     xf.startTag("branchpoints")
     for b in nml.branchpoints:
-        dump_branchpoint(xf, b)
+        __dump_branchpoint(xf, b)
     xf.endTag()  # branchpoints
 
     xf.startTag("comments")
     for c in nml.comments:
-        dump_comment(xf, c)
+        __dump_comment(xf, c)
     xf.endTag()  # comments
 
     xf.startTag("groups")
     for g in nml.groups:
-        dump_group(xf, g)
+        __dump_group(xf, g)
     xf.endTag()  # groups
     xf.endTag()  # things
 
 
-def write_nml(file, nml: NML):
+def write_nml(file: BinaryIO, nml: NML):
+    """
+    Writes an NML object to a file on disk.
+
+        Arguments:
+            file (BinaryIO): A Python file handle
+            nml (NML): A NML object that should be persisted to disk
+
+    Example:
+        ```
+        with open("out.nml", "wb") as f:
+            wknml.write_nml(f, nml)
+        ```
+    """
     with XmlWriter(file) as xf:
-        dump_nml(xf, nml)
+        __dump_nml(xf, nml)

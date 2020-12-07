@@ -1,6 +1,8 @@
 # wknml
 [![PyPI version](https://img.shields.io/pypi/v/wknml)](https://pypi.python.org/pypi/wknml)
 [![Supported Python Versions](https://img.shields.io/pypi/pyversions/wknml.svg)](https://pypi.python.org/pypi/wknml)
+[![Documentation](https://img.shields.io/badge/docs-passing-brightgreen.svg)](https://github.com/scalableminds/wknml/blob/master/docs/wknml.md)
+
 
 Python library for working with [webKnossos](https://webknossos.org) [NML files](https://docs.webknossos.org/reference/data_formats#nml).
 
@@ -11,8 +13,14 @@ To use wknml, you need to have Python 3.6+ (on the system or with Anaconda) inst
 pip install wknml
 ```
 
-## Example Snippets
-Some example to get you started. Make sure to also check the `examples` directory:
+## Documentation
+
+See [docs/wknml.md](docs/wknml.md) for an API documentation.
+
+## Examples
+
+Some examples to get you started. Make sure to also check the `examples` directory:
+
 ```python
 # Load an NML file
 with open("input.nml", "rb") as f:
@@ -56,6 +64,11 @@ poetry run pytest tests
 PyPi releases are automatically pushed when creating a new Git tag/Github release. Make sure to bump the package version number manually:
 ```
 poetry version <patch, minor, major>
+```
+
+If necessary, rebuild the documentation and commit to repository:
+```
+poetry run pydoc-markdown -m wknml --render-toc > docs/wknml.md
 ```
 
 # License
