@@ -60,14 +60,17 @@ def test_no_default_values_written():
 
 
 def test_pickle_serialization():
-    # Test if NML objects can be serialized with pickle
+    # Test if NML objects can be serialized & deserialized with pickle
     input_file_name = "testdata/nml_without_default_values.nml"
     output_file_name = "testoutput/nml_without_default_values.nml.pickle"
 
     with open(input_file_name, "r") as file:
         test_nml = parse_nml(file)
 
-    with open(output_file_name, "wb") as outfile:
-        pickle.dump(test_nml, outfile)
+    with open(output_file_name, "wb") as output_file:
+        pickle.dump(test_nml, output_file)
 
-    assert True
+    with open(output_file_name, "rb") as input_file:
+        new_nml = pickle.load(input_file)
+
+    assert test_nml == new_nml
