@@ -1,4 +1,4 @@
-name: Upload Python Package
+name: Test and Upload Python Package
 
 on: [push]
 
@@ -18,10 +18,14 @@ jobs:
     - name: Check formatting
       run: |
         poetry run black --check wknml tests examples
-    - name: Test
+    - name: Unit Tests
       run: |
         mkdir -p testoutput
         poetry run pytest tests
+    - name: Check Documentation for updates
+      run: |
+        poetry run pydoc-markdown -m wknml --render-toc > docs/ci_test.md
+        diff docs/ci_test.md docs/wknml.md
     - name: Build and publish
       if: startsWith(github.event.ref, 'refs/tags')
       env:
