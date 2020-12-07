@@ -33,10 +33,11 @@ for tree in nml.trees:
 # Write a new NML file to disk
 with open("out.nml", "wb") as f:
     wknml.write_nml(f, nml)
+```
 
+```bash
 # Convert an NML file with unlinked nodes to one with connected trees
 python -m examples.fix_unlinked_nml <unlinked>.nml <fixed>.nml
-
 ```
 
 # Development
