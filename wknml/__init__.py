@@ -25,13 +25,13 @@ class NMLParameters(NamedTuple):
 
     name: str
     scale: Vector3
-    offset: Optional[Vector3]
-    time: Optional[int]
-    editPosition: Optional[Vector3]
-    editRotation: Optional[Vector3]
-    zoomLevel: Optional[float]
-    taskBoundingBox: Optional[IntVector6]
-    userBoundingBox: Optional[IntVector6]
+    offset: Optional[Vector3] = None
+    time: Optional[int] = None
+    editPosition: Optional[Vector3] = None
+    editRotation: Optional[Vector3] = None
+    zoomLevel: Optional[float] = None
+    taskBoundingBox: Optional[IntVector6] = None
+    userBoundingBox: Optional[IntVector6] = None
 
 
 class Node(NamedTuple):
@@ -52,13 +52,13 @@ class Node(NamedTuple):
 
     id: int
     position: Vector3
-    radius: Optional[float]
-    rotation: Optional[Vector3]
-    inVp: Optional[int]
-    inMag: Optional[int]
-    bitDepth: Optional[int]
-    interpolation: Optional[bool]
-    time: Optional[int]
+    radius: Optional[float] = None
+    rotation: Optional[Vector3] = None
+    inVp: Optional[int] = None
+    inMag: Optional[int] = None
+    bitDepth: Optional[int] = None
+    interpolation: Optional[bool] = None
+    time: Optional[int] = None
 
 
 class Edge(NamedTuple):
@@ -92,7 +92,7 @@ class Tree(NamedTuple):
     name: str
     nodes: List[Node]
     edges: List[Edge]
-    groupId: Optional[int]
+    groupId: Optional[int] = None
 
 
 class Branchpoint(NamedTuple):
