@@ -1,4 +1,5 @@
 import xml.etree.ElementTree as ET
+from xml.etree.ElementTree import Element
 from loxun import XmlWriter
 from typing import BinaryIO, NamedTuple, List, Tuple, Optional
 
@@ -136,6 +137,21 @@ class Comment(NamedTuple):
     content: str
 
 
+class Volume(NamedTuple):
+    """
+    A metadata reference to a wK volume annotation. Typically, the volum annotation data is provided a ZIP file in the same directory as the skeleton annotation.
+
+    Attributes:
+        id (int): Unique Identifier
+        location (str): path to a ZIP file containing a wK volume annotation
+        fallback_layer (Optional[str]): name of an already existing wK volume annotation segmentation layer (aka "fallback layer")
+    """
+
+    id: int
+    location: str
+    fallback_layer: Optional[str]
+
+
 class NML(NamedTuple):
     """
     A complete webKnossos skeleton annotation object contain one or more skeletons (trees).
@@ -146,6 +162,7 @@ class NML(NamedTuple):
         branchpoints: List[Branchpoint]
         comments: List[Comment]
         groups: List[Group]
+        volume: Optional[Volume]
     """
 
     parameters: NMLParameters
@@ -153,6 +170,7 @@ class NML(NamedTuple):
     branchpoints: List[Branchpoint]
     comments: List[Comment]
     groups: List[Group]
+    volume: Optional[Volume] = None
 
 
 def __parse_bounding_box(nml_parameters, prefix):
@@ -170,7 +188,7 @@ def __parse_bounding_box(nml_parameters, prefix):
     return boundingBox
 
 
-def __parse_parameters(nml_parameters):
+def __parse_parameters(nml_parameters: Element):
     offset = None
     if nml_parameters.find("offset") is not None:
         offset = (
@@ -223,7 +241,7 @@ def __parse_parameters(nml_parameters):
     )
 
 
-def __parse_node(nml_node):
+def __parse_node(nml_node: Element):
     rotation = None
     if nml_node.get("rotX") is not None:
         rotation = (
@@ -255,11 +273,11 @@ def __parse_node(nml_node):
     )
 
 
-def __parse_edge(nml_edge):
+def __parse_edge(nml_edge: Element):
     return Edge(source=int(nml_edge.get("source")), target=int(nml_edge.get("target")))
 
 
-def __parse_tree(nml_tree):
+def __parse_tree(nml_tree: Element):
     name = None
     if "comment" in nml_tree.attrib:
         name = nml_tree.get("comment")
@@ -296,7 +314,7 @@ def __parse_tree(nml_tree):
     )
 
 
-def __parse_branchpoint(nml_branchpoint):
+def __parse_branchpoint(nml_branchpoint: Element):
     return Branchpoint(
         int(nml_branchpoint.get("id")),
         int(nml_branchpoint.get("time"))
@@ -305,14 +323,22 @@ def __parse_branchpoint(nml_branchpoint):
     )
 
 
-def __parse_comment(nml_comment):
+def __parse_comment(nml_comment: Element):
     return Comment(
         int(nml_comment.get("node")), nml_comment.get("content", default=None)
     )
 
 
-def __parse_group(nml_group):
+def __parse_group(nml_group: Element):
     return Group(int(nml_group.get("id")), nml_group.get("name", default=None), [])
+
+
+def __parse_volume(nml_volume: Element):
+    return Volume(
+        int(nml_volume.get("id")),
+        nml_volume.get("location", default=None),
+        nml_volume.get("fallback_layer", default=None),
+    )
 
 
 def parse_nml(file: BinaryIO) -> NML:
@@ -340,6 +366,7 @@ def parse_nml(file: BinaryIO) -> NML:
     root_group = Group(-1, "", [])
     group_stack = [root_group]
     element_stack = []
+    volume = None
 
     for event, elem in ET.iterparse(file, events=("start", "end")):
         if event == "start":
@@ -361,6 +388,8 @@ def parse_nml(file: BinaryIO) -> NML:
                 branchpoints.append(__parse_branchpoint(elem))
             elif elem.tag == "comment":
                 comments.append(__parse_comment(elem))
+            elif elem.tag == "volume":
+                volume = __parse_volume(elem)
             elif elem.tag == "group":
                 group = __parse_group(elem)
                 group_stack[-1].children.append(group)
@@ -386,10 +415,11 @@ def parse_nml(file: BinaryIO) -> NML:
         branchpoints=branchpoints,
         comments=comments,
         groups=root_group.children,
+        volume=Volume,
     )
 
 
-def __dump_bounding_box(xf, parameters, prefix):
+def __dump_bounding_box(xf: XmlWriter, parameters, prefix):
     bboxName = prefix + "BoundingBox"
     parametersBox = getattr(parameters, bboxName)
 
@@ -407,7 +437,7 @@ def __dump_bounding_box(xf, parameters, prefix):
         )
 
 
-def __dump_parameters(xf, parameters):
+def __dump_parameters(xf: XmlWriter, parameters: NMLParameters):
     xf.startTag("parameters")
     xf.tag("experiment", {"name": parameters.name})
     xf.tag(
@@ -458,7 +488,7 @@ def __dump_parameters(xf, parameters):
     xf.endTag()  # parameters
 
 
-def __dump_node(xf, node):
+def __dump_node(xf: XmlWriter, node: Node):
 
     attributes = {
         "id": str(node.id),
@@ -493,11 +523,11 @@ def __dump_node(xf, node):
     xf.tag("node", attributes)
 
 
-def __dump_edge(xf, edge):
+def __dump_edge(xf: XmlWriter, edge: Edge):
     xf.tag("edge", {"source": str(edge.source), "target": str(edge.target)})
 
 
-def __dump_tree(xf, tree):
+def __dump_tree(xf: XmlWriter, tree: Tree):
     attributes = {
         "id": str(tree.id),
         "color.r": str(tree.color[0]),
@@ -522,7 +552,7 @@ def __dump_tree(xf, tree):
     xf.endTag()  # thing
 
 
-def __dump_branchpoint(xf, branchpoint):
+def __dump_branchpoint(xf: XmlWriter, branchpoint: Branchpoint):
     if branchpoint.time is not None:
         xf.tag(
             "branchpoint", {"id": str(branchpoint.id), "time": str(branchpoint.time)}
@@ -531,21 +561,42 @@ def __dump_branchpoint(xf, branchpoint):
         xf.tag("branchpoint", {"id": str(branchpoint.id)})
 
 
-def __dump_comment(xf, comment):
+def __dump_comment(xf: XmlWriter, comment: Comment):
     if comment.content is not None:
         xf.tag("comment", {"node": str(comment.node), "content": comment.content})
     else:
         xf.tag("comment", {"node": str(comment.node)})
 
 
-def __dump_group(xf, group):
+def __dump_volume(xf: XmlWriter, volume: Volume):
+    if volume is not None:
+        if volume.fallback_layer is not None:
+            xf.tag(
+                "volume",
+                {
+                    "id": str(volume.id),
+                    "location": volume.location,
+                    "fallbackLayer": volume.fallback_layer,
+                },
+            )
+        else:
+            xf.tag(
+                "volume",
+                {
+                    "id": str(volume.id),
+                    "location": volume.location,
+                },
+            )
+
+
+def __dump_group(xf: XmlWriter, group: Group):
     xf.startTag("group", {"id": str(group.id), "name": group.name})
     for g in group.children:
         __dump_group(xf, g)
     xf.endTag()  # group
 
 
-def __dump_nml(xf, nml: NML):
+def __dump_nml(xf: XmlWriter, nml: NML):
     xf.startTag("things")
     __dump_parameters(xf, nml.parameters)
     for t in nml.trees:
@@ -565,6 +616,9 @@ def __dump_nml(xf, nml: NML):
     for g in nml.groups:
         __dump_group(xf, g)
     xf.endTag()  # groups
+
+    __dump_volume(xf, nml.volume)
+
     xf.endTag()  # things
 
 
