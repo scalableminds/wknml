@@ -12,16 +12,19 @@ class NMLParameters(NamedTuple):
     """
     Contains common metadata for NML files
 
+    Note:
+        Setting a task or user bounding boxes will cause wK to 1) render these visually and 2) prevent data loading from outside them.
+
     Attributes:
-        name: str
-        scale: Vector3
-        offset: Optional[Vector3]
-        time: Optional[int]
-        editPosition: Optional[Vector3]
-        editRotation: Optional[Vector3]
-        zoomLevel: Optional[float]
-        taskBoundingBox: Optional[IntVector6]
-        userBoundingBox: Optional[IntVector6]
+        name (str): Name of a dataset that the annotation is based on. Will cause wK to open the given skeleton annotation with the referenced dataset.
+        scale (Vector3): Voxel scale of the referenced dataset in nanometers.
+        offset (Optional[Vector3]): Deprecated. Kept for backward compatibility.
+        time (Optional[int]): A UNIX timestamp marking the creation time & date of an annotation.
+        editPosition (Optional[Vector3]): The position of the wK camera when creating/downloading an annotation
+        editRotation (Optional[Vector3]): The rotation of the wK camera when creating/downloading an annotation
+        zoomLevel (Optional[float]): The zoomLevel of the wK camera when creating/downloading an annotation
+        taskBoundingBox (Optional[IntVector6]): A custom bounding box specified as part of a [wK task](https://docs.webknossos.org/guides/tasks). Will be rendered in wK.
+        userBoundingBox (Optional[IntVector6]): A custom user-defined bounding box. Will be rendered in wK.
     """
 
     name: str
