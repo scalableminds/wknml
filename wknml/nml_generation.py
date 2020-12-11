@@ -1,10 +1,20 @@
-from wknml import NMLParameters, Group, Edge, Node, Tree, NML, Branchpoint, Comment
+from wknml import (
+    NMLParameters,
+    Group,
+    Edge,
+    Node,
+    Tree,
+    NML,
+    Branchpoint,
+    Comment,
+    Volume,
+)
 import networkx as nx
 import numpy as np
 
 import logging
 import colorsys
-from typing import Text, Tuple, List, Dict, Union, Any
+from typing import Optional, Text, Tuple, List, Dict, Union, Any
 from copy import deepcopy
 
 
@@ -92,6 +102,7 @@ def generate_nml(
     tree_dict: Union[List[nx.Graph], Dict[str, List[nx.Graph]]],
     parameters: Dict[str, Any] = {},
     globalize_ids: bool = True,
+    volume: Optional[Dict[str, Any]] = None,
 ) -> NML:
     """
     A utility to convert a [NetworkX graph object](https://networkx.org/) into wK NML skeleton annotation object. Accepts both a simple list of multiple skeletons/trees or a dictionary grouping skeleton inputs.
@@ -100,6 +111,7 @@ def generate_nml(
         tree_dict (Union[List[nx.Graph], Dict[str, List[nx.Graph]]]): A list of wK tree-like structures as NetworkX graphs or a dictionary of group names and same list of NetworkX tree objects.
         parameters (Dict[str, Any]): A dictionary representation of the skeleton annotation metadata. See `NMLParameters` for accepted attributes.
         globalize_ids (bool = True): An option to re-assign new, globally unique IDs to all skeletons. Default: `True`
+        volume (Optional[Dict[str, Any]] = None): A dictionary representation of a reference to wK a volume annotation. See `Volume` object for attributes.
 
     Return:
         nml (NML): A wK NML skeleton annotation object
@@ -170,12 +182,20 @@ def generate_nml(
                 )
             )
 
+    if volume is not None and "location" in volume and "id" in volume:
+        volume = Volume(
+            id=volume.get("id"),
+            location=volume.get("location"),
+            fallback_layer=volume.get("fallback_layer", None),
+        )
+
     nml = NML(
         parameters=nmlParameters,
         trees=trees,
         branchpoints=branchpoints,
         comments=comments,
         groups=groups,
+        volume=volume,
     )
 
     return nml

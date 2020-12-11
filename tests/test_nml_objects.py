@@ -1,5 +1,7 @@
 from itertools import count
 
+from networkx.algorithms.cuts import volume
+
 from wknml import (
     Edge,
     Group,
@@ -9,6 +11,7 @@ from wknml import (
     Tree,
     Branchpoint,
     NMLParameters,
+    Volume,
 )
 from networkx.classes.graph import Graph
 
@@ -66,12 +69,19 @@ def test_build_new_nml_onject():
         userBoundingBox=[1, 2, 3, 1, 2, 3],
     )
 
+    volume = Volume(
+        id=next(id_counter),
+        location="some/path/to/data.zip",
+        fallback_layer="segmentation_layer",
+    )
+
     nml = NML(
         parameters=parameters,
         trees=[tree],
         branchpoints=[branchpoint],
         comments=[comment],
         groups=[group3],
+        volume=volume,
     )
 
     # pass test if all objects can be constructed successfully
@@ -83,22 +93,28 @@ def test_optional_parameters():
     id_counter = count()
 
     node = Node(id=next(id_counter), position=[1, 2, 3])
-    assert node.radius == None
-    assert node.rotation == None
-    assert node.inVp == None
-    assert node.inMag == None
-    assert node.bitDepth == None
-    assert node.interpolation == None
-    assert node.time == None
+    assert node.radius is None
+    assert node.rotation is None
+    assert node.inVp is None
+    assert node.inMag is None
+    assert node.bitDepth is None
+    assert node.interpolation is None
+    assert node.time is None
 
     tree = Tree(next(id_counter), edges=[], nodes=[], name="Test", color=[])
-    assert tree.groupId == None
+    assert tree.groupId is None
 
     parameters = NMLParameters("Test Annotation", [1, 2, 3])
-    assert parameters.offset == None
-    assert parameters.time == None
-    assert parameters.editPosition == None
-    assert parameters.editRotation == None
-    assert parameters.zoomLevel == None
-    assert parameters.taskBoundingBox == None
-    assert parameters.userBoundingBox == None
+    assert parameters.offset is None
+    assert parameters.time is None
+    assert parameters.editPosition is None
+    assert parameters.editRotation is None
+    assert parameters.zoomLevel is None
+    assert parameters.taskBoundingBox is None
+    assert parameters.userBoundingBox is None
+
+    volume = Volume(
+        id=next(id_counter),
+        location="some/path/to/data.zip",
+    )
+    assert volume.fallback_layer is None

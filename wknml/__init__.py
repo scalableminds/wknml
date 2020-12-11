@@ -149,7 +149,7 @@ class Volume(NamedTuple):
 
     id: int
     location: str
-    fallback_layer: Optional[str]
+    fallback_layer: Optional[str] = None
 
 
 class NML(NamedTuple):
