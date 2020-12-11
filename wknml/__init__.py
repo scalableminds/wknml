@@ -42,7 +42,7 @@ class Node(NamedTuple):
     Attributes:
         id (int): A unique identifier
         position (Vector3): 3D position of a node. Format: [x, y, z]
-        radius (Optional[float]): Radius of a node when rendered in wK
+        radius (float = 1.0): Radius of a node when rendered in wK. Unit: nanometers (nm)
         rotation (Optional[Vector3]): 3D rotation of the camera when the node was annotated. Mostly relevant for `Flight` mode to resume in the same direction when returning to `Flight` mode.
         inVp (Optional[int]): Enumeration of the wK UI viewport in which the node was annotated. `0`: XY plane, `1`: YZ plane. `2`: XY plane, `3`: 3D viewport
         inMag (Optional[int]): wK rendering magnification-level when the node was annotated. Lower magnification levels typically indicate a "zoomed-in" workflow resulting in more accurate annotations.
@@ -53,7 +53,7 @@ class Node(NamedTuple):
 
     id: int
     position: Vector3
-    radius: Optional[float] = None
+    radius: float = 1.0
     rotation: Optional[Vector3] = None
     inVp: Optional[int] = None
     inMag: Optional[int] = None

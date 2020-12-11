@@ -89,11 +89,11 @@ def test_build_new_nml_onject():
 
 
 def test_optional_parameters():
-    """Test minimal object constructor. Are the defaults applied."""
+    """Test minimal object constructor. Check to see if the defaults are applied."""
     id_counter = count()
 
     node = Node(id=next(id_counter), position=[1, 2, 3])
-    assert node.radius is None
+    assert node.radius == 1.0
     assert node.rotation is None
     assert node.inVp is None
     assert node.inMag is None
