@@ -40,15 +40,15 @@ class Node(NamedTuple):
     A webKnossos skeleton node annotation object.
 
     Attributes:
-        id: int
-        position: Vector3
-        radius: Optional[float]
-        rotation: Optional[Vector3]
-        inVp: Optional[int]
-        inMag: Optional[int]
-        bitDepth: Optional[int]
-        interpolation: Optional[bool]
-        time: Optional[int]
+        id (int): A unique identifier
+        position (Vector3): 3D position of a node. Format: [x, y, z]
+        radius (Optional[float]): Radius of a node when rendered in wK
+        rotation (Optional[Vector3]): 3D rotation of the camera when the node was annotated. Mostly relevant for `Flight` mode to resume in the same direction when returning to `Flight` mode.
+        inVp (Optional[int]): Enumeration of the wK UI viewport in which the node was annotated. `0`: XY plane, `1`: YZ plane. `2`: XY plane, `3`: 3D viewport
+        inMag (Optional[int]): wK rendering magnification-level when the node was annotated. Lower magnification levels typically indicate a "zoomed-in" workflow resulting in more accurate annotations.
+        bitDepth (Optional[int]): wK rendering bit-depth when the node was annotated. 4bit (lower data quality) or 8bit (regular quality). Lower quality data rendering might lead to less accurate annotations.
+        interpolation (Optional[bool]): wK rendering interpolation flag when the node was annotated. Interpolated data rendering might lead to less accurate annotations.
+        time (Optional[int]): A Unix timestamp
     """
 
     id: int
@@ -101,7 +101,7 @@ class Branchpoint(NamedTuple):
     A webKnossos branchpoint, i.e. a skeleton node with more than one outgoing edge.
 
     Attributes:
-        id (int): node id reference
+        id (int): Reference to a `Node` ID
         time (int): Unix timestamp
     """
 
@@ -114,9 +114,9 @@ class Group(NamedTuple):
     A container to group several skeletons (trees) together. Mostly for cosmetic or organizational purposes.
 
     Attributes:
-        id: int
-        name: str
-        children: List[Group]
+        id (int): A u unique group identifier
+        name (str): NameA  of the group. Will be displayed in wK UI
+        children (List[Group]): List of all sub-groups belonging to this parent element for nested structures
     """
 
     id: int
@@ -129,8 +129,8 @@ class Comment(NamedTuple):
     A single comment belonging to a skeleton node.
 
     Attributes:
-        node (int): node id reference
-        content (str): supports Markdown
+        node (int): Reference to a `Node` ID
+        content (str): A free text field. Supports Markdown formatting.
     """
 
     node: int
@@ -142,8 +142,8 @@ class Volume(NamedTuple):
     A metadata reference to a wK volume annotation. Typically, the volum annotation data is provided a ZIP file in the same directory as the skeleton annotation.
 
     Attributes:
-        id (int): Unique Identifier
-        location (str): path to a ZIP file containing a wK volume annotation
+        id (int): A unique Identifier
+        location (str): A path to a ZIP file containing a wK volume annotation
         fallback_layer (Optional[str]): name of an already existing wK volume annotation segmentation layer (aka "fallback layer")
     """
 
@@ -157,12 +157,12 @@ class NML(NamedTuple):
     A complete webKnossos skeleton annotation object contain one or more skeletons (trees).
 
     Attributes:
-        parameters: NMLParameters
-        trees: List[Tree]
-        branchpoints: List[Branchpoint]
-        comments: List[Comment]
-        groups: List[Group]
-        volume: Optional[Volume]
+        parameters (NMLParameters): All the metadata attributes associated with a wK skeleton annotation.
+        trees (List[Tree]): A list of all skeleton/tree objects. Usually contains of the information.
+        branchpoints (List[Branchpoint]): A list of all branchpoint objects.
+        comments (List[Comment]): A list of all comment objects.
+        groups (List[Group]): A list of all group objects.
+        volume (Optional[Volume]): A reference to any volume data that might reside in the directory as the NML file.
     """
 
     parameters: NMLParameters
@@ -345,7 +345,7 @@ def parse_nml(file: BinaryIO) -> NML:
     """
     Reads a webKnossos NML skeleton file from disk, parses it and returns an NML Python object
 
-    Attributes:
+    Arguments:
         file (BinaryIO): A Python file handle
 
     Return:
@@ -626,9 +626,9 @@ def write_nml(file: BinaryIO, nml: NML):
     """
     Writes an NML object to a file on disk.
 
-        Arguments:
-            file (BinaryIO): A Python file handle
-            nml (NML): A NML object that should be persisted to disk
+    Arguments:
+        file (BinaryIO): A Python file handle
+        nml (NML): A NML object that should be persisted to disk
 
     Example:
         ```

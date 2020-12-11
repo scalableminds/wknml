@@ -34,6 +34,6 @@ jobs:
 
     - name: Check Documentation for updates
       run: |
-        poetry run pydoc-markdown -m wknml --render-toc > docs/ci_test.md
+        poetry run pydoc-markdown -m wknml -m wknml.nml_generation --render-toc > docs/ci_test.md
         diff docs/ci_test.md docs/wknml.md
         rm docs/ci_test.md

@@ -4,14 +4,17 @@ import numpy as np
 
 import logging
 import colorsys
-from typing import Tuple, List, Dict, Union, Any
+from typing import Text, Tuple, List, Dict, Union, Any
 from copy import deepcopy
 
 
 logger = logging.getLogger(__name__)
 
 
-def random_color_rgba():
+def random_color_rgba() -> Tuple[float, float, float, float]:
+    """
+    A utility to generate a new random RGBA color.
+    """
     # https://stackoverflow.com/a/43437435/783758
 
     h, s, l = (
@@ -20,10 +23,14 @@ def random_color_rgba():
         0.4 + np.random.random() / 5.0,
     )
     r, g, b = colorsys.hls_to_rgb(h, l, s)
-    return (r, g, b, 1)
+    return (r, g, b, 1.0)
 
 
 def discard_children_hierarchy(groups: List[Group]) -> List[Group]:
+    """
+    A utility to flatten the group structure. All sub-groups will become top-level items.
+    """
+
     groups_without_hierarchy = []
     for group in groups:
         children = discard_children_hierarchy(group.children)
@@ -35,6 +42,13 @@ def discard_children_hierarchy(groups: List[Group]) -> List[Group]:
 
 
 def globalize_tree_ids(group_dict: Dict[str, List[nx.Graph]]):
+    """
+    A utility to in-place re-assign new and globally unqiue IDs to all Tree objects. Starts with ID 1
+
+    Arguments:
+        group_dict (Dict[str, List[nx.Graph]]): A mapping of group names to a list of tree as NetworkX graph objects
+    """
+
     current_id = 1
     for tree_group in group_dict.values():
         for tree in tree_group:
@@ -43,6 +57,15 @@ def globalize_tree_ids(group_dict: Dict[str, List[nx.Graph]]):
 
 
 def globalize_node_ids(group_dict: Dict[str, List[nx.Graph]]):
+    """
+    A utility to in-place re-assign new and globally unqiue IDs to all Node objects. Edges are updated accordingly. Starts with ID 1.
+
+    Note: Does not update any `Comment`s or `BranchPoint`s referencing these nodes.
+
+    Arguments:
+        group_dict (Dict[str, List[nx.Graph]]): A mapping of group names to a list of tree as NetworkX graph objects
+    """
+
     current_id = 1
     for tree_group in group_dict.values():
         for tree_index in range(len(tree_group)):
@@ -68,8 +91,21 @@ def globalize_node_ids(group_dict: Dict[str, List[nx.Graph]]):
 def generate_nml(
     tree_dict: Union[List[nx.Graph], Dict[str, List[nx.Graph]]],
     parameters: Dict[str, Any] = {},
-    globalize_ids=True,
+    globalize_ids: bool = True,
 ) -> NML:
+    """
+    A utility to convert a [NetworkX graph object](https://networkx.org/) into wK NML skeleton annotation object. Accepts both a simple list of multiple skeletons/trees or a dictionary grouping skeleton inputs.
+
+    Arguments:
+        tree_dict (Union[List[nx.Graph], Dict[str, List[nx.Graph]]]): A list of wK tree-like structures as NetworkX graphs or a dictionary of group names and same list of NetworkX tree objects.
+        parameters (Dict[str, Any]): A dictionary representation of the skeleton annotation metadata. See `NMLParameters` for accepted attributes.
+        globalize_ids (bool = True): An option to re-assign new, globally unique IDs to all skeletons. Default: `True`
+
+    Return:
+        nml (NML): A wK NML skeleton annotation object
+            1. A dictionary with group names as keys and list of all respective NML trees as values
+            2. A dictionary representation of the NML metadata parameters
+    """
     no_group_provided = False
     if not isinstance(tree_dict, dict):
         tree_dict = {"main_group": tree_dict}
@@ -145,7 +181,19 @@ def generate_nml(
     return nml
 
 
-def generate_graph(nml: NML) -> Tuple[Dict[str, List[nx.Graph]], Dict]:
+def generate_graph(nml: NML) -> Tuple[Dict[str, List[nx.Graph]], Dict[Text, any]]:
+    """
+    A utility to convert wK NML object into a [NetworkX graph object](https://networkx.org/). Skeletons/Trees are grouped by the provided groups in the NML file.
+
+    Arguments:
+        nml (NML): A wK NML skeleton annotation object
+
+    Return:
+        A tuple consisting of:
+            1. A dictionary with group names as keys and list of all respective NML trees as values
+            2. A dictionary representation of the NML metadata parameters. See `NMLParameters` for attributes.
+    """
+
     nml = deepcopy(nml)._replace(groups=discard_children_hierarchy(nml.groups))
     group_dict = {}
     for group in nml.groups:
@@ -190,12 +238,24 @@ def generate_graph(nml: NML) -> Tuple[Dict[str, List[nx.Graph]], Dict]:
 
 
 def nml_tree_to_graph(tree: Tree) -> nx.Graph:
-    optional_attribute_list = ["rotation", "inVp", "inMag", "bitDepth", "interpolation"]
+    """
+    A utility to convert a single wK Tree object into a [NetworkX graph object](https://networkx.org/).
+    """
+
+    optional_attribute_list = [
+        "rotation",
+        "inVp",
+        "inMag",
+        "bitDepth",
+        "interpolation",
+        "time",
+    ]
 
     graph = nx.Graph(id=tree.id, color=tree.color, name=tree.name, groupId=tree.groupId)
     for node in tree.nodes:
         node_id = node.id
         graph.add_node(node_id, id=node_id, radius=node.radius, position=node.position)
+
         for optional_attribute in optional_attribute_list:
             if getattr(node, optional_attribute) is not None:
                 graph.nodes[node_id][optional_attribute] = getattr(
@@ -210,6 +270,13 @@ def nml_tree_to_graph(tree: Tree) -> nx.Graph:
 def extract_nodes_and_edges_from_graph(
     graph: nx.Graph,
 ) -> Tuple[List[Node], List[Edge]]:
+    """
+    A utility to convert a single [NetworkX graph object](https://networkx.org/) into a list of `Node`objects and `Edge` objects.
+
+    Return
+        Tuple[List[Node], List[Edge]]: A tuple contain both all nodes and edges
+    """
+
     node_nml = [
         Node(
             id=graph.nodes[node]["id"],
