@@ -415,7 +415,7 @@ def parse_nml(file: BinaryIO) -> NML:
         branchpoints=branchpoints,
         comments=comments,
         groups=root_group.children,
-        volume=Volume,
+        volume=volume,
     )
 
 

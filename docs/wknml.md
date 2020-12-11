@@ -21,6 +21,7 @@
   * [generate\_graph](#wknml.nml_generation.generate_graph)
   * [nml\_tree\_to\_graph](#wknml.nml_generation.nml_tree_to_graph)
   * [extract\_nodes\_and\_edges\_from\_graph](#wknml.nml_generation.extract_nodes_and_edges_from_graph)
+* [wknml.nml\_utils](#wknml.nml_utils)
 
 <a name="wknml"></a>
 # wknml
@@ -334,4 +335,7 @@ A utility to convert a single [NetworkX graph object](https://networkx.org/) int
 
 Return
     Tuple[List[Node], List[Edge]]: A tuple contain both all nodes and edges
+
+<a name="wknml.nml_utils"></a>
+# wknml.nml\_utils
 
