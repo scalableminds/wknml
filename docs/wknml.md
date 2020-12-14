@@ -35,17 +35,22 @@ class NMLParameters(NamedTuple)
 
 Contains common metadata for NML files
 
+**Notes**:
+
+  Setting a task or user bounding boxes will cause wK to 1) render these visually and 2) prevent data loading from outside them.
+  
+
 **Attributes**:
 
-- `name` - str
-- `scale` - Vector3
-- `offset` - Optional[Vector3]
-- `time` - Optional[int]
-- `editPosition` - Optional[Vector3]
-- `editRotation` - Optional[Vector3]
-- `zoomLevel` - Optional[float]
-- `taskBoundingBox` - Optional[IntVector6]
-- `userBoundingBox` - Optional[IntVector6]
+- `name` _str_ - Name of a dataset that the annotation is based on. Will cause wK to open the given skeleton annotation with the referenced dataset.
+- `scale` _Vector3_ - Voxel scale of the referenced dataset in nanometers.
+- `offset` _Optional[Vector3]_ - Deprecated. Kept for backward compatibility.
+- `time` _Optional[int]_ - A UNIX timestamp marking the creation time & date of an annotation.
+- `editPosition` _Optional[Vector3]_ - The position of the wK camera when creating/downloading an annotation
+- `editRotation` _Optional[Vector3]_ - The rotation of the wK camera when creating/downloading an annotation
+- `zoomLevel` _Optional[float]_ - The zoomLevel of the wK camera when creating/downloading an annotation
+- `taskBoundingBox` _Optional[IntVector6]_ - A custom bounding box specified as part of a [wK task](https://docs.webknossos.org/guides/tasks). Will be rendered in wK.
+- `userBoundingBox` _Optional[IntVector6]_ - A custom user-defined bounding box. Will be rendered in wK.
 
 <a name="wknml.Node"></a>
 ## Node Objects
@@ -60,7 +65,7 @@ A webKnossos skeleton node annotation object.
 
 - `id` _int_ - A unique identifier
 - `position` _Vector3_ - 3D position of a node. Format: [x, y, z]
-- `radius` _Optional[float]_ - Radius of a node when rendered in wK
+- `radius` _float = 1.0_ - Radius of a node when rendered in wK. Unit: nanometers (nm)
 - `rotation` _Optional[Vector3]_ - 3D rotation of the camera when the node was annotated. Mostly relevant for `Flight` mode to resume in the same direction when returning to `Flight` mode.
 - `inVp` _Optional[int]_ - Enumeration of the wK UI viewport in which the node was annotated. `0`: XY plane, `1`: YZ plane. `2`: XY plane, `3`: 3D viewport
 - `inMag` _Optional[int]_ - wK rendering magnification-level when the node was annotated. Lower magnification levels typically indicate a "zoomed-in" workflow resulting in more accurate annotations.
@@ -277,7 +282,7 @@ Note: Does not update any `Comment`s or `BranchPoint`s referencing these nodes.
 #### generate\_nml
 
 ```python
-generate_nml(tree_dict: Union[List[nx.Graph], Dict[str, List[nx.Graph]]], parameters: Dict[str, Any] = {}, globalize_ids: bool = True) -> NML
+generate_nml(tree_dict: Union[List[nx.Graph], Dict[str, List[nx.Graph]]], parameters: Dict[str, Any] = {}, globalize_ids: bool = True, volume: Optional[Dict[str, Any]] = None) -> NML
 ```
 
 A utility to convert a [NetworkX graph object](https://networkx.org/) into wK NML skeleton annotation object. Accepts both a simple list of multiple skeletons/trees or a dictionary grouping skeleton inputs.
@@ -287,6 +292,7 @@ A utility to convert a [NetworkX graph object](https://networkx.org/) into wK NM
 - `tree_dict` _Union[List[nx.Graph], Dict[str, List[nx.Graph]]]_ - A list of wK tree-like structures as NetworkX graphs or a dictionary of group names and same list of NetworkX tree objects.
 - `parameters` _Dict[str, Any]_ - A dictionary representation of the skeleton annotation metadata. See `NMLParameters` for accepted attributes.
 - `globalize_ids` _bool = True_ - An option to re-assign new, globally unique IDs to all skeletons. Default: `True`
+- `volume` _Optional[Dict[str, Any]] = None_ - A dictionary representation of a reference to wK a volume annotation. See `Volume` object for attributes.
   
 
 **Returns**:
