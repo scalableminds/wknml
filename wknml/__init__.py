@@ -17,14 +17,14 @@ class NMLParameters(NamedTuple):
 
     Attributes:
         name (str): Name of a dataset that the annotation is based on. Will cause wK to open the given skeleton annotation with the referenced dataset.
-        scale (Vector3): Voxel scale of the referenced dataset in nanometers.
-        offset (Optional[Vector3]): Deprecated. Kept for backward compatibility.
+        scale (Vector3[float]): Voxel scale of the referenced dataset in nanometers.
+        offset (Optional[Vector3[float]]): Deprecated. Kept for backward compatibility.
         time (Optional[int]): A UNIX timestamp marking the creation time & date of an annotation.
-        editPosition (Optional[Vector3]): The position of the wK camera when creating/downloading an annotation
-        editRotation (Optional[Vector3]): The rotation of the wK camera when creating/downloading an annotation
+        editPosition (Optional[Vector3[float]]): The position of the wK camera when creating/downloading an annotation
+        editRotation (Optional[Vector3[float]]): The rotation of the wK camera when creating/downloading an annotation
         zoomLevel (Optional[float]): The zoomLevel of the wK camera when creating/downloading an annotation
-        taskBoundingBox (Optional[IntVector6]): A custom bounding box specified as part of a [wK task](https://docs.webknossos.org/guides/tasks). Will be rendered in wK.
-        userBoundingBox (Optional[IntVector6]): A custom user-defined bounding box. Will be rendered in wK.
+        taskBoundingBox (Optional[IntVector6[int]]): A custom bounding box specified as part of a [wK task](https://docs.webknossos.org/guides/tasks). Will be rendered in wK.
+        userBoundingBox (Optional[IntVector6[int]]): A custom user-defined bounding box. Will be rendered in wK.
     """
 
     name: str
@@ -51,7 +51,8 @@ class Node(NamedTuple):
         inMag (Optional[int]): wK rendering magnification-level when the node was annotated. Lower magnification levels typically indicate a "zoomed-in" workflow resulting in more accurate annotations.
         bitDepth (Optional[int]): wK rendering bit-depth when the node was annotated. 4bit (lower data quality) or 8bit (regular quality). Lower quality data rendering might lead to less accurate annotations.
         interpolation (Optional[bool]): wK rendering interpolation flag when the node was annotated. Interpolated data rendering might lead to less accurate annotations.
-        time (Optional[int]): A Unix timestamp
+        time (Optional[int]): A Unix timestamp marking the creation time of the node.
+
     """
 
     id: int
