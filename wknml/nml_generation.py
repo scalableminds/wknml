@@ -56,7 +56,7 @@ def globalize_tree_ids(group_dict: Dict[str, List[nx.Graph]]):
     A utility to in-place re-assign new and globally unqiue IDs to all Tree objects. Starts with ID 1
 
     Arguments:
-        group_dict (Dict[str, List[nx.Graph]]): A mapping of group names to a list of tree as NetworkX graph objects
+        group_dict (Dict[str, List[nx.Graph]]): A mapping of group names to a list of trees as NetworkX graph objects
     """
 
     current_id = 1
@@ -70,10 +70,8 @@ def globalize_node_ids(group_dict: Dict[str, List[nx.Graph]]):
     """
     A utility to in-place re-assign new and globally unqiue IDs to all Node objects. Edges are updated accordingly. Starts with ID 1.
 
-    Note: Does not update any `Comment`s or `BranchPoint`s referencing these nodes.
-
     Arguments:
-        group_dict (Dict[str, List[nx.Graph]]): A mapping of group names to a list of tree as NetworkX graph objects
+        group_dict (Dict[str, List[nx.Graph]]): A mapping of group names to a list of trees as NetworkX graph objects
     """
 
     current_id = 1
@@ -108,15 +106,13 @@ def generate_nml(
     A utility to convert a [NetworkX graph object](https://networkx.org/) into wK NML skeleton annotation object. Accepts both a simple list of multiple skeletons/trees or a dictionary grouping skeleton inputs.
 
     Arguments:
-        tree_dict (Union[List[nx.Graph], Dict[str, List[nx.Graph]]]): A list of wK tree-like structures as NetworkX graphs or a dictionary of group names and same list of NetworkX tree objects.
+        tree_dict (Union[List[nx.Graph], Dict[str, List[nx.Graph]]]): A list of wK tree-like structures as NetworkX graphs or a dictionary of group names and same lists of NetworkX tree objects.
         parameters (Dict[str, Any]): A dictionary representation of the skeleton annotation metadata. See `NMLParameters` for accepted attributes.
         globalize_ids (bool = True): An option to re-assign new, globally unique IDs to all skeletons. Default: `True`
-        volume (Optional[Dict[str, Any]] = None): A dictionary representation of a reference to wK a volume annotation. See `Volume` object for attributes.
+        volume (Optional[Dict[str, Any]] = None): A dictionary representation of a reference to a wK volume annotation. See `Volume` object for attributes.
 
     Return:
         nml (NML): A wK NML skeleton annotation object
-            1. A dictionary with group names as keys and lists of all respective NML trees as values
-            2. A dictionary representation of the NML metadata parameters
     """
     no_group_provided = False
     if not isinstance(tree_dict, dict):

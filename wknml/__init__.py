@@ -17,14 +17,14 @@ class NMLParameters(NamedTuple):
 
     Attributes:
         name (str): Name of a dataset that the annotation is based on. Will cause wK to open the given skeleton annotation with the referenced dataset.
-        scale (Vector3): Voxel scale of the referenced dataset in nanometers.
-        offset (Optional[Vector3]): Deprecated. Kept for backward compatibility.
+        scale (Vector3[float]): Voxel scale of the referenced dataset in nanometers.
+        offset (Optional[Vector3[float]]): Deprecated. Kept for backward compatibility.
         time (Optional[int]): A UNIX timestamp marking the creation time & date of an annotation.
-        editPosition (Optional[Vector3]): The position of the wK camera when creating/downloading an annotation
-        editRotation (Optional[Vector3]): The rotation of the wK camera when creating/downloading an annotation
+        editPosition (Optional[Vector3[float]]): The position of the wK camera when creating/downloading an annotation
+        editRotation (Optional[Vector3[float]]): The rotation of the wK camera when creating/downloading an annotation
         zoomLevel (Optional[float]): The zoomLevel of the wK camera when creating/downloading an annotation
-        taskBoundingBox (Optional[IntVector6]): A custom bounding box specified as part of a [wK task](https://docs.webknossos.org/guides/tasks). Will be rendered in wK.
-        userBoundingBox (Optional[IntVector6]): A custom user-defined bounding box. Will be rendered in wK.
+        taskBoundingBox (Optional[IntVector6[int]]): A custom bounding box specified as part of a [wK task](https://docs.webknossos.org/guides/tasks). Will be rendered in wK.
+        userBoundingBox (Optional[IntVector6[int]]): A custom user-defined bounding box. Will be rendered in wK.
     """
 
     name: str
@@ -51,7 +51,8 @@ class Node(NamedTuple):
         inMag (Optional[int]): wK rendering magnification-level when the node was annotated. Lower magnification levels typically indicate a "zoomed-in" workflow resulting in more accurate annotations.
         bitDepth (Optional[int]): wK rendering bit-depth when the node was annotated. 4bit (lower data quality) or 8bit (regular quality). Lower quality data rendering might lead to less accurate annotations.
         interpolation (Optional[bool]): wK rendering interpolation flag when the node was annotated. Interpolated data rendering might lead to less accurate annotations.
-        time (Optional[int]): A Unix timestamp
+        time (Optional[int]): A Unix timestamp marking the creation time of the node.
+
     """
 
     id: int
@@ -117,8 +118,8 @@ class Group(NamedTuple):
     A container to group several skeletons (trees) together. Mostly for cosmetic or organizational purposes.
 
     Attributes:
-        id (int): A u unique group identifier
-        name (str): NameA  of the group. Will be displayed in wK UI
+        id (int): A unique group identifier
+        name (str): Name of the group. Will be displayed in wK UI
         children (List[Group]): List of all sub-groups belonging to this parent element for nested structures
     """
 
@@ -142,12 +143,12 @@ class Comment(NamedTuple):
 
 class Volume(NamedTuple):
     """
-    A metadata reference to a wK volume annotation. Typically, the volum annotation data is provided a ZIP file in the same directory as the skeleton annotation.
+    A metadata reference to a wK volume annotation. Typically, the volume annotation data is provided in a ZIP file in the same directory as the skeleton annotation.
 
     Attributes:
-        id (int): A unique Identifier
+        id (int): A unique identifier
         location (str): A path to a ZIP file containing a wK volume annotation
-        fallback_layer (Optional[str]): name of an already existing wK volume annotation segmentation layer (aka "fallback layer")
+        fallback_layer (Optional[str]): Name of an already existing wK volume annotation segmentation layer (aka "fallback layer")
     """
 
     id: int
@@ -160,12 +161,12 @@ class NML(NamedTuple):
     A complete webKnossos skeleton annotation object contain one or more skeletons (trees).
 
     Attributes:
-        parameters (NMLParameters): All the metadata attributes associated with a wK skeleton annotation.
-        trees (List[Tree]): A list of all skeleton/tree objects. Usually contains of the information.
+        parameters (NMLParameters): All the metadata attributes associated with a wK annotation.
+        trees (List[Tree]): A list of all skeleton/tree objects. Usually contains the majority of the annotated skeleton information.
         branchpoints (List[Branchpoint]): A list of all branchpoint objects.
         comments (List[Comment]): A list of all comment objects.
         groups (List[Group]): A list of all group objects.
-        volume (Optional[Volume]): A reference to any volume data that might reside in the directory as the NML file.
+        volume (Optional[Volume]): A reference to any volume data that is part of this annotation.
     """
 
     parameters: NMLParameters
