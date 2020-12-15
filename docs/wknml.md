@@ -318,7 +318,7 @@ A utility to convert a wK NML object into a [NetworkX graph object](https://netw
 **Returns**:
 
   A tuple consisting of:
-  1. A dictionary with group names as keys and list of all respective NML trees as values
+  1. A dictionary with group names as keys and lists of all respective NML trees as values
   2. A dictionary representation of the NML metadata parameters. See `NMLParameters` for attributes.
 
 <a name="wknml.nml_generation.nml_tree_to_graph"></a>
