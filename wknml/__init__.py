@@ -56,7 +56,7 @@ class Node(NamedTuple):
 
     id: int
     position: Vector3
-    radius: float = 1.0
+    radius: Optional[float] = None
     rotation: Optional[Vector3] = None
     inVp: Optional[int] = None
     inMag: Optional[int] = None
