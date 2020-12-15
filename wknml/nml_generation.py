@@ -115,7 +115,7 @@ def generate_nml(
 
     Return:
         nml (NML): A wK NML skeleton annotation object
-            1. A dictionary with group names as keys and list of all respective NML trees as values
+            1. A dictionary with group names as keys and lists of all respective NML trees as values
             2. A dictionary representation of the NML metadata parameters
     """
     no_group_provided = False
@@ -203,7 +203,7 @@ def generate_nml(
 
 def generate_graph(nml: NML) -> Tuple[Dict[str, List[nx.Graph]], Dict[Text, any]]:
     """
-    A utility to convert wK NML object into a [NetworkX graph object](https://networkx.org/). Skeletons/Trees are grouped by the provided groups in the NML file.
+    A utility to convert a wK NML object into a [NetworkX graph object](https://networkx.org/). Skeletons/Trees are grouped by the provided groups in the NML file.
 
     Arguments:
         nml (NML): A wK NML skeleton annotation object
@@ -291,10 +291,10 @@ def extract_nodes_and_edges_from_graph(
     graph: nx.Graph,
 ) -> Tuple[List[Node], List[Edge]]:
     """
-    A utility to convert a single [NetworkX graph object](https://networkx.org/) into a list of `Node`objects and `Edge` objects.
+    A utility to convert a single [NetworkX graph object](https://networkx.org/) into a list of `Node` objects and `Edge` objects.
 
     Return
-        Tuple[List[Node], List[Edge]]: A tuple contain both all nodes and edges
+        Tuple[List[Node], List[Edge]]: A tuple containing both all nodes and all edges
     """
 
     node_nml = [

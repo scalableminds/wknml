@@ -1,7 +1,5 @@
 from itertools import count
 
-from networkx.algorithms.cuts import volume
-
 from wknml import (
     Edge,
     Group,

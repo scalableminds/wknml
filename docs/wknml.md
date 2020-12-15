@@ -37,7 +37,7 @@ Contains common metadata for NML files
 
 **Notes**:
 
-  Setting a task or user bounding boxes will cause wK to 1) render these visually and 2) prevent data loading from outside them.
+  Setting a task bounding boxes will cause wK to 1) render these visually and 2) prevent data loading from outside them.
   
 
 **Attributes**:
@@ -65,7 +65,7 @@ A webKnossos skeleton node annotation object.
 
 - `id` _int_ - A unique identifier
 - `position` _Vector3_ - 3D position of a node. Format: [x, y, z]
-- `radius` _float = 1.0_ - Radius of a node when rendered in wK. Unit: nanometers (nm)
+- `radius` _Optional[float]_ - Radius of a node when rendered in wK. Unit: nanometers (nm)
 - `rotation` _Optional[Vector3]_ - 3D rotation of the camera when the node was annotated. Mostly relevant for `Flight` mode to resume in the same direction when returning to `Flight` mode.
 - `inVp` _Optional[int]_ - Enumeration of the wK UI viewport in which the node was annotated. `0`: XY plane, `1`: YZ plane. `2`: XY plane, `3`: 3D viewport
 - `inMag` _Optional[int]_ - wK rendering magnification-level when the node was annotated. Lower magnification levels typically indicate a "zoomed-in" workflow resulting in more accurate annotations.
@@ -298,7 +298,7 @@ A utility to convert a [NetworkX graph object](https://networkx.org/) into wK NM
 **Returns**:
 
 - `nml` _NML_ - A wK NML skeleton annotation object
-  1. A dictionary with group names as keys and list of all respective NML trees as values
+  1. A dictionary with group names as keys and lists of all respective NML trees as values
   2. A dictionary representation of the NML metadata parameters
 
 <a name="wknml.nml_generation.generate_graph"></a>
@@ -308,7 +308,7 @@ A utility to convert a [NetworkX graph object](https://networkx.org/) into wK NM
 generate_graph(nml: NML) -> Tuple[Dict[str, List[nx.Graph]], Dict[Text, any]]
 ```
 
-A utility to convert wK NML object into a [NetworkX graph object](https://networkx.org/). Skeletons/Trees are grouped by the provided groups in the NML file.
+A utility to convert a wK NML object into a [NetworkX graph object](https://networkx.org/). Skeletons/Trees are grouped by the provided groups in the NML file.
 
 **Arguments**:
 
@@ -337,10 +337,10 @@ A utility to convert a single wK Tree object into a [NetworkX graph object](http
 extract_nodes_and_edges_from_graph(graph: nx.Graph) -> Tuple[List[Node], List[Edge]]
 ```
 
-A utility to convert a single [NetworkX graph object](https://networkx.org/) into a list of `Node`objects and `Edge` objects.
+A utility to convert a single [NetworkX graph object](https://networkx.org/) into a list of `Node` objects and `Edge` objects.
 
 Return
-    Tuple[List[Node], List[Edge]]: A tuple contain both all nodes and edges
+    Tuple[List[Node], List[Edge]]: A tuple containing both all nodes and all edges
 
 <a name="wknml.nml_utils"></a>
 # wknml.nml\_utils

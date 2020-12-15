@@ -13,7 +13,7 @@ class NMLParameters(NamedTuple):
     Contains common metadata for NML files
 
     Note:
-        Setting a task or user bounding boxes will cause wK to 1) render these visually and 2) prevent data loading from outside them.
+        Setting a task bounding boxes will cause wK to 1) render these visually and 2) prevent data loading from outside them.
 
     Attributes:
         name (str): Name of a dataset that the annotation is based on. Will cause wK to open the given skeleton annotation with the referenced dataset.
