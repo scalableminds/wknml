@@ -93,7 +93,7 @@ def test_optional_parameters():
     id_counter = count()
 
     node = Node(id=next(id_counter), position=[1, 2, 3])
-    assert node.radius == 1.0
+    assert node.radius == None
     assert node.rotation is None
     assert node.inVp is None
     assert node.inMag is None
