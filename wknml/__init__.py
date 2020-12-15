@@ -117,8 +117,8 @@ class Group(NamedTuple):
     A container to group several skeletons (trees) together. Mostly for cosmetic or organizational purposes.
 
     Attributes:
-        id (int): A u unique group identifier
-        name (str): NameA  of the group. Will be displayed in wK UI
+        id (int): A unique group identifier
+        name (str): Name of the group. Will be displayed in wK UI
         children (List[Group]): List of all sub-groups belonging to this parent element for nested structures
     """
 
@@ -142,12 +142,12 @@ class Comment(NamedTuple):
 
 class Volume(NamedTuple):
     """
-    A metadata reference to a wK volume annotation. Typically, the volum annotation data is provided a ZIP file in the same directory as the skeleton annotation.
+    A metadata reference to a wK volume annotation. Typically, the volume annotation data is provided in a ZIP file in the same directory as the skeleton annotation.
 
     Attributes:
-        id (int): A unique Identifier
+        id (int): A unique identifier
         location (str): A path to a ZIP file containing a wK volume annotation
-        fallback_layer (Optional[str]): name of an already existing wK volume annotation segmentation layer (aka "fallback layer")
+        fallback_layer (Optional[str]): Name of an already existing wK volume annotation segmentation layer (aka "fallback layer")
     """
 
     id: int
@@ -160,12 +160,12 @@ class NML(NamedTuple):
     A complete webKnossos skeleton annotation object contain one or more skeletons (trees).
 
     Attributes:
-        parameters (NMLParameters): All the metadata attributes associated with a wK skeleton annotation.
-        trees (List[Tree]): A list of all skeleton/tree objects. Usually contains of the information.
+        parameters (NMLParameters): All the metadata attributes associated with a wK annotation.
+        trees (List[Tree]): A list of all skeleton/tree objects. Usually contains the majority of the annotated skeleton information.
         branchpoints (List[Branchpoint]): A list of all branchpoint objects.
         comments (List[Comment]): A list of all comment objects.
         groups (List[Group]): A list of all group objects.
-        volume (Optional[Volume]): A reference to any volume data that might reside in the directory as the NML file.
+        volume (Optional[Volume]): A reference to any volume data that is part of this annotation.
     """
 
     parameters: NMLParameters

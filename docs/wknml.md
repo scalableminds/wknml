@@ -130,8 +130,8 @@ A container to group several skeletons (trees) together. Mostly for cosmetic or 
 
 **Attributes**:
 
-- `id` _int_ - A u unique group identifier
-- `name` _str_ - NameA  of the group. Will be displayed in wK UI
+- `id` _int_ - A unique group identifier
+- `name` _str_ - Name of the group. Will be displayed in wK UI
 - `children` _List[Group]_ - List of all sub-groups belonging to this parent element for nested structures
 
 <a name="wknml.Comment"></a>
@@ -155,13 +155,13 @@ A single comment belonging to a skeleton node.
 class Volume(NamedTuple)
 ```
 
-A metadata reference to a wK volume annotation. Typically, the volum annotation data is provided a ZIP file in the same directory as the skeleton annotation.
+A metadata reference to a wK volume annotation. Typically, the volume annotation data is provided in a ZIP file in the same directory as the skeleton annotation.
 
 **Attributes**:
 
-- `id` _int_ - A unique Identifier
+- `id` _int_ - A unique identifier
 - `location` _str_ - A path to a ZIP file containing a wK volume annotation
-- `fallback_layer` _Optional[str]_ - name of an already existing wK volume annotation segmentation layer (aka "fallback layer")
+- `fallback_layer` _Optional[str]_ - Name of an already existing wK volume annotation segmentation layer (aka "fallback layer")
 
 <a name="wknml.NML"></a>
 ## NML Objects
@@ -174,12 +174,12 @@ A complete webKnossos skeleton annotation object contain one or more skeletons (
 
 **Attributes**:
 
-- `parameters` _NMLParameters_ - All the metadata attributes associated with a wK skeleton annotation.
-- `trees` _List[Tree]_ - A list of all skeleton/tree objects. Usually contains of the information.
+- `parameters` _NMLParameters_ - All the metadata attributes associated with a wK annotation.
+- `trees` _List[Tree]_ - A list of all skeleton/tree objects. Usually contains the majority of the annotated skeleton information.
 - `branchpoints` _List[Branchpoint]_ - A list of all branchpoint objects.
 - `comments` _List[Comment]_ - A list of all comment objects.
 - `groups` _List[Group]_ - A list of all group objects.
-- `volume` _Optional[Volume]_ - A reference to any volume data that might reside in the directory as the NML file.
+- `volume` _Optional[Volume]_ - A reference to any volume data that is part of this annotation.
 
 <a name="wknml.parse_nml"></a>
 #### parse\_nml
@@ -261,7 +261,7 @@ A utility to in-place re-assign new and globally unqiue IDs to all Tree objects.
 
 **Arguments**:
 
-- `group_dict` _Dict[str, List[nx.Graph]]_ - A mapping of group names to a list of tree as NetworkX graph objects
+- `group_dict` _Dict[str, List[nx.Graph]]_ - A mapping of group names to a list of trees as NetworkX graph objects
 
 <a name="wknml.nml_generation.globalize_node_ids"></a>
 #### globalize\_node\_ids
@@ -272,11 +272,9 @@ globalize_node_ids(group_dict: Dict[str, List[nx.Graph]])
 
 A utility to in-place re-assign new and globally unqiue IDs to all Node objects. Edges are updated accordingly. Starts with ID 1.
 
-Note: Does not update any `Comment`s or `BranchPoint`s referencing these nodes.
-
 **Arguments**:
 
-- `group_dict` _Dict[str, List[nx.Graph]]_ - A mapping of group names to a list of tree as NetworkX graph objects
+- `group_dict` _Dict[str, List[nx.Graph]]_ - A mapping of group names to a list of trees as NetworkX graph objects
 
 <a name="wknml.nml_generation.generate_nml"></a>
 #### generate\_nml
@@ -289,17 +287,15 @@ A utility to convert a [NetworkX graph object](https://networkx.org/) into wK NM
 
 **Arguments**:
 
-- `tree_dict` _Union[List[nx.Graph], Dict[str, List[nx.Graph]]]_ - A list of wK tree-like structures as NetworkX graphs or a dictionary of group names and same list of NetworkX tree objects.
+- `tree_dict` _Union[List[nx.Graph], Dict[str, List[nx.Graph]]]_ - A list of wK tree-like structures as NetworkX graphs or a dictionary of group names and same lists of NetworkX tree objects.
 - `parameters` _Dict[str, Any]_ - A dictionary representation of the skeleton annotation metadata. See `NMLParameters` for accepted attributes.
 - `globalize_ids` _bool = True_ - An option to re-assign new, globally unique IDs to all skeletons. Default: `True`
-- `volume` _Optional[Dict[str, Any]] = None_ - A dictionary representation of a reference to wK a volume annotation. See `Volume` object for attributes.
+- `volume` _Optional[Dict[str, Any]] = None_ - A dictionary representation of a reference to a wK volume annotation. See `Volume` object for attributes.
   
 
 **Returns**:
 
 - `nml` _NML_ - A wK NML skeleton annotation object
-  1. A dictionary with group names as keys and lists of all respective NML trees as values
-  2. A dictionary representation of the NML metadata parameters
 
 <a name="wknml.nml_generation.generate_graph"></a>
 #### generate\_graph
