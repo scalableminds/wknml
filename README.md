@@ -69,7 +69,7 @@ poetry version <patch, minor, major>
 
 If necessary, rebuild the documentation and commit to repository:
 ```
-poetry run pydoc-markdown -m wknml --render-toc > docs/wknml.md
+poetry run pydoc-markdown -m wknml -m wknml.nml_generation -m wknml.nml_utils --render-toc > docs/wknml.md
 ```
 
 # License

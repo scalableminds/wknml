@@ -1,4 +1,5 @@
 import xml.etree.ElementTree as ET
+from xml.etree.ElementTree import Element
 from loxun import XmlWriter
 from typing import BinaryIO, NamedTuple, List, Tuple, Optional
 
@@ -11,16 +12,19 @@ class NMLParameters(NamedTuple):
     """
     Contains common metadata for NML files
 
+    Note:
+        Setting a task bounding boxes will cause wK to 1) render these visually and 2) prevent data loading from outside them.
+
     Attributes:
-        name: str
-        scale: Vector3
-        offset: Optional[Vector3]
-        time: Optional[int]
-        editPosition: Optional[Vector3]
-        editRotation: Optional[Vector3]
-        zoomLevel: Optional[float]
-        taskBoundingBox: Optional[IntVector6]
-        userBoundingBox: Optional[IntVector6]
+        name (str): Name of a dataset that the annotation is based on. Will cause wK to open the given skeleton annotation with the referenced dataset.
+        scale (Vector3): Voxel scale of the referenced dataset in nanometers.
+        offset (Optional[Vector3]): Deprecated. Kept for backward compatibility.
+        time (Optional[int]): A UNIX timestamp marking the creation time & date of an annotation.
+        editPosition (Optional[Vector3]): The position of the wK camera when creating/downloading an annotation
+        editRotation (Optional[Vector3]): The rotation of the wK camera when creating/downloading an annotation
+        zoomLevel (Optional[float]): The zoomLevel of the wK camera when creating/downloading an annotation
+        taskBoundingBox (Optional[IntVector6]): A custom bounding box specified as part of a [wK task](https://docs.webknossos.org/guides/tasks). Will be rendered in wK.
+        userBoundingBox (Optional[IntVector6]): A custom user-defined bounding box. Will be rendered in wK.
     """
 
     name: str
@@ -39,15 +43,15 @@ class Node(NamedTuple):
     A webKnossos skeleton node annotation object.
 
     Attributes:
-        id: int
-        position: Vector3
-        radius: Optional[float]
-        rotation: Optional[Vector3]
-        inVp: Optional[int]
-        inMag: Optional[int]
-        bitDepth: Optional[int]
-        interpolation: Optional[bool]
-        time: Optional[int]
+        id (int): A unique identifier
+        position (Vector3): 3D position of a node. Format: [x, y, z]
+        radius (Optional[float]): Radius of a node when rendered in wK. Unit: nanometers (nm)
+        rotation (Optional[Vector3]): 3D rotation of the camera when the node was annotated. Mostly relevant for `Flight` mode to resume in the same direction when returning to `Flight` mode.
+        inVp (Optional[int]): Enumeration of the wK UI viewport in which the node was annotated. `0`: XY plane, `1`: YZ plane. `2`: XY plane, `3`: 3D viewport
+        inMag (Optional[int]): wK rendering magnification-level when the node was annotated. Lower magnification levels typically indicate a "zoomed-in" workflow resulting in more accurate annotations.
+        bitDepth (Optional[int]): wK rendering bit-depth when the node was annotated. 4bit (lower data quality) or 8bit (regular quality). Lower quality data rendering might lead to less accurate annotations.
+        interpolation (Optional[bool]): wK rendering interpolation flag when the node was annotated. Interpolated data rendering might lead to less accurate annotations.
+        time (Optional[int]): A Unix timestamp
     """
 
     id: int
@@ -100,7 +104,7 @@ class Branchpoint(NamedTuple):
     A webKnossos branchpoint, i.e. a skeleton node with more than one outgoing edge.
 
     Attributes:
-        id (int): node id reference
+        id (int): Reference to a `Node` ID
         time (int): Unix timestamp
     """
 
@@ -113,9 +117,9 @@ class Group(NamedTuple):
     A container to group several skeletons (trees) together. Mostly for cosmetic or organizational purposes.
 
     Attributes:
-        id: int
-        name: str
-        children: List[Group]
+        id (int): A u unique group identifier
+        name (str): NameA  of the group. Will be displayed in wK UI
+        children (List[Group]): List of all sub-groups belonging to this parent element for nested structures
     """
 
     id: int
@@ -128,12 +132,27 @@ class Comment(NamedTuple):
     A single comment belonging to a skeleton node.
 
     Attributes:
-        node (int): node id reference
-        content (str): supports Markdown
+        node (int): Reference to a `Node` ID
+        content (str): A free text field. Supports Markdown formatting.
     """
 
     node: int
     content: str
+
+
+class Volume(NamedTuple):
+    """
+    A metadata reference to a wK volume annotation. Typically, the volum annotation data is provided a ZIP file in the same directory as the skeleton annotation.
+
+    Attributes:
+        id (int): A unique Identifier
+        location (str): A path to a ZIP file containing a wK volume annotation
+        fallback_layer (Optional[str]): name of an already existing wK volume annotation segmentation layer (aka "fallback layer")
+    """
+
+    id: int
+    location: str
+    fallback_layer: Optional[str] = None
 
 
 class NML(NamedTuple):
@@ -141,11 +160,12 @@ class NML(NamedTuple):
     A complete webKnossos skeleton annotation object contain one or more skeletons (trees).
 
     Attributes:
-        parameters: NMLParameters
-        trees: List[Tree]
-        branchpoints: List[Branchpoint]
-        comments: List[Comment]
-        groups: List[Group]
+        parameters (NMLParameters): All the metadata attributes associated with a wK skeleton annotation.
+        trees (List[Tree]): A list of all skeleton/tree objects. Usually contains of the information.
+        branchpoints (List[Branchpoint]): A list of all branchpoint objects.
+        comments (List[Comment]): A list of all comment objects.
+        groups (List[Group]): A list of all group objects.
+        volume (Optional[Volume]): A reference to any volume data that might reside in the directory as the NML file.
     """
 
     parameters: NMLParameters
@@ -153,6 +173,7 @@ class NML(NamedTuple):
     branchpoints: List[Branchpoint]
     comments: List[Comment]
     groups: List[Group]
+    volume: Optional[Volume] = None
 
 
 def __parse_bounding_box(nml_parameters, prefix):
@@ -170,7 +191,7 @@ def __parse_bounding_box(nml_parameters, prefix):
     return boundingBox
 
 
-def __parse_parameters(nml_parameters):
+def __parse_parameters(nml_parameters: Element):
     offset = None
     if nml_parameters.find("offset") is not None:
         offset = (
@@ -223,7 +244,7 @@ def __parse_parameters(nml_parameters):
     )
 
 
-def __parse_node(nml_node):
+def __parse_node(nml_node: Element):
     rotation = None
     if nml_node.get("rotX") is not None:
         rotation = (
@@ -255,11 +276,11 @@ def __parse_node(nml_node):
     )
 
 
-def __parse_edge(nml_edge):
+def __parse_edge(nml_edge: Element):
     return Edge(source=int(nml_edge.get("source")), target=int(nml_edge.get("target")))
 
 
-def __parse_tree(nml_tree):
+def __parse_tree(nml_tree: Element):
     name = None
     if "comment" in nml_tree.attrib:
         name = nml_tree.get("comment")
@@ -296,7 +317,7 @@ def __parse_tree(nml_tree):
     )
 
 
-def __parse_branchpoint(nml_branchpoint):
+def __parse_branchpoint(nml_branchpoint: Element):
     return Branchpoint(
         int(nml_branchpoint.get("id")),
         int(nml_branchpoint.get("time"))
@@ -305,21 +326,29 @@ def __parse_branchpoint(nml_branchpoint):
     )
 
 
-def __parse_comment(nml_comment):
+def __parse_comment(nml_comment: Element):
     return Comment(
         int(nml_comment.get("node")), nml_comment.get("content", default=None)
     )
 
 
-def __parse_group(nml_group):
+def __parse_group(nml_group: Element):
     return Group(int(nml_group.get("id")), nml_group.get("name", default=None), [])
+
+
+def __parse_volume(nml_volume: Element):
+    return Volume(
+        int(nml_volume.get("id")),
+        nml_volume.get("location", default=None),
+        nml_volume.get("fallback_layer", default=None),
+    )
 
 
 def parse_nml(file: BinaryIO) -> NML:
     """
     Reads a webKnossos NML skeleton file from disk, parses it and returns an NML Python object
 
-    Attributes:
+    Arguments:
         file (BinaryIO): A Python file handle
 
     Return:
@@ -340,6 +369,7 @@ def parse_nml(file: BinaryIO) -> NML:
     root_group = Group(-1, "", [])
     group_stack = [root_group]
     element_stack = []
+    volume = None
 
     for event, elem in ET.iterparse(file, events=("start", "end")):
         if event == "start":
@@ -361,6 +391,8 @@ def parse_nml(file: BinaryIO) -> NML:
                 branchpoints.append(__parse_branchpoint(elem))
             elif elem.tag == "comment":
                 comments.append(__parse_comment(elem))
+            elif elem.tag == "volume":
+                volume = __parse_volume(elem)
             elif elem.tag == "group":
                 group = __parse_group(elem)
                 group_stack[-1].children.append(group)
@@ -386,10 +418,11 @@ def parse_nml(file: BinaryIO) -> NML:
         branchpoints=branchpoints,
         comments=comments,
         groups=root_group.children,
+        volume=volume,
     )
 
 
-def __dump_bounding_box(xf, parameters, prefix):
+def __dump_bounding_box(xf: XmlWriter, parameters, prefix):
     bboxName = prefix + "BoundingBox"
     parametersBox = getattr(parameters, bboxName)
 
@@ -407,7 +440,7 @@ def __dump_bounding_box(xf, parameters, prefix):
         )
 
 
-def __dump_parameters(xf, parameters):
+def __dump_parameters(xf: XmlWriter, parameters: NMLParameters):
     xf.startTag("parameters")
     xf.tag("experiment", {"name": parameters.name})
     xf.tag(
@@ -458,7 +491,7 @@ def __dump_parameters(xf, parameters):
     xf.endTag()  # parameters
 
 
-def __dump_node(xf, node):
+def __dump_node(xf: XmlWriter, node: Node):
 
     attributes = {
         "id": str(node.id),
@@ -493,11 +526,11 @@ def __dump_node(xf, node):
     xf.tag("node", attributes)
 
 
-def __dump_edge(xf, edge):
+def __dump_edge(xf: XmlWriter, edge: Edge):
     xf.tag("edge", {"source": str(edge.source), "target": str(edge.target)})
 
 
-def __dump_tree(xf, tree):
+def __dump_tree(xf: XmlWriter, tree: Tree):
     attributes = {
         "id": str(tree.id),
         "color.r": str(tree.color[0]),
@@ -522,7 +555,7 @@ def __dump_tree(xf, tree):
     xf.endTag()  # thing
 
 
-def __dump_branchpoint(xf, branchpoint):
+def __dump_branchpoint(xf: XmlWriter, branchpoint: Branchpoint):
     if branchpoint.time is not None:
         xf.tag(
             "branchpoint", {"id": str(branchpoint.id), "time": str(branchpoint.time)}
@@ -531,21 +564,42 @@ def __dump_branchpoint(xf, branchpoint):
         xf.tag("branchpoint", {"id": str(branchpoint.id)})
 
 
-def __dump_comment(xf, comment):
+def __dump_comment(xf: XmlWriter, comment: Comment):
     if comment.content is not None:
         xf.tag("comment", {"node": str(comment.node), "content": comment.content})
     else:
         xf.tag("comment", {"node": str(comment.node)})
 
 
-def __dump_group(xf, group):
+def __dump_volume(xf: XmlWriter, volume: Volume):
+    if volume is not None:
+        if volume.fallback_layer is not None:
+            xf.tag(
+                "volume",
+                {
+                    "id": str(volume.id),
+                    "location": volume.location,
+                    "fallbackLayer": volume.fallback_layer,
+                },
+            )
+        else:
+            xf.tag(
+                "volume",
+                {
+                    "id": str(volume.id),
+                    "location": volume.location,
+                },
+            )
+
+
+def __dump_group(xf: XmlWriter, group: Group):
     xf.startTag("group", {"id": str(group.id), "name": group.name})
     for g in group.children:
         __dump_group(xf, g)
     xf.endTag()  # group
 
 
-def __dump_nml(xf, nml: NML):
+def __dump_nml(xf: XmlWriter, nml: NML):
     xf.startTag("things")
     __dump_parameters(xf, nml.parameters)
     for t in nml.trees:
@@ -565,6 +619,9 @@ def __dump_nml(xf, nml: NML):
     for g in nml.groups:
         __dump_group(xf, g)
     xf.endTag()  # groups
+
+    __dump_volume(xf, nml.volume)
+
     xf.endTag()  # things
 
 
@@ -572,9 +629,9 @@ def write_nml(file: BinaryIO, nml: NML):
     """
     Writes an NML object to a file on disk.
 
-        Arguments:
-            file (BinaryIO): A Python file handle
-            nml (NML): A NML object that should be persisted to disk
+    Arguments:
+        file (BinaryIO): A Python file handle
+        nml (NML): A NML object that should be persisted to disk
 
     Example:
         ```
