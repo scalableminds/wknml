@@ -25,7 +25,7 @@ Some examples to get you started. Make sure to also check the `examples` directo
 ```python
 # Load an NML file
 with open("input.nml", "rb") as f:
-    nml = wknml.parse_nml(f, nml)
+    nml = wknml.parse_nml(f)
 
 # Access the most important properties
 print(nml.parameters)
