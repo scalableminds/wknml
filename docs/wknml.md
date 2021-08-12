@@ -50,7 +50,7 @@ Contains common metadata for NML files
 - `editRotation` _Optional[Vector3[float]]_ - The rotation of the wK camera when creating/downloading an annotation
 - `zoomLevel` _Optional[float]_ - The zoomLevel of the wK camera when creating/downloading an annotation
 - `taskBoundingBox` _Optional[IntVector6[int]]_ - A custom bounding box specified as part of a [wK task](https://docs.webknossos.org/guides/tasks). Will be rendered in wK.
-- `userBoundingBox` _Optional[IntVector6[int]]_ - A custom user-defined bounding box. Will be rendered in wK.
+- `userBoundingBoxes` _Optional[List[IntVector6[int]]]_ - A list of custom user-defined bounding boxes. Will be rendered in wK.
 
 <a name="wknml.Node"></a>
 ## Node Objects
