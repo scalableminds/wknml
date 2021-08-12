@@ -16,7 +16,7 @@ from networkx.classes.graph import Graph
 timestamp = 1607446137
 
 
-def test_build_new_nml_onject():
+def test_build_new_nml_object():
     """Create a new NML object from primitives. Test each constructor"""
 
     id_counter = count()
