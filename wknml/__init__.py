@@ -179,6 +179,7 @@ class NML(NamedTuple):
 
 def __parse_user_bounding_boxes(nml_parameters: Element):
     # ToDo support color, id, name, isVisible attributes
+    # https://github.com/scalableminds/wknml/issues/46
     bb_elements = nml_parameters.findall("userBoundingBox")
     return [__parse_bounding_box(bb_element) for bb_element in bb_elements]
 
