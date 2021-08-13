@@ -180,10 +180,7 @@ class NML(NamedTuple):
 def __parse_user_bounding_boxes(nml_parameters: Element):
     # ToDo support color, id, name, isVisible attributes
     bb_elements = nml_parameters.findall("userBoundingBox")
-    if len(bb_elements) > 0:
-        return [__parse_bounding_box(bb_element) for bb_element in bb_elements]
-
-    return []
+    return [__parse_bounding_box(bb_element) for bb_element in bb_elements]
 
 
 def __parse_task_bounding_box(nml_parameters: Element):
