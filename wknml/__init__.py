@@ -1,7 +1,7 @@
 import xml.etree.ElementTree as ET
 from xml.etree.ElementTree import Element
 from loxun import XmlWriter
-from typing import BinaryIO, NamedTuple, List, Tuple, Optional
+from typing import BinaryIO, NamedTuple, List, Tuple, Optional, Text
 
 Vector3 = Tuple[float, float, float]
 Vector4 = Tuple[float, float, float, float]
@@ -24,7 +24,7 @@ class NMLParameters(NamedTuple):
         editRotation (Optional[Vector3[float]]): The rotation of the wK camera when creating/downloading an annotation
         zoomLevel (Optional[float]): The zoomLevel of the wK camera when creating/downloading an annotation
         taskBoundingBox (Optional[IntVector6[int]]): A custom bounding box specified as part of a [wK task](https://docs.webknossos.org/guides/tasks). Will be rendered in wK.
-        userBoundingBox (Optional[IntVector6[int]]): A custom user-defined bounding box. Will be rendered in wK.
+        userBoundingBoxes (Optional[List[IntVector6[int]]]): A list of custom user-defined bounding boxes. Will be rendered in wK.
     """
 
     name: str
@@ -35,7 +35,7 @@ class NMLParameters(NamedTuple):
     editRotation: Optional[Vector3] = None
     zoomLevel: Optional[float] = None
     taskBoundingBox: Optional[IntVector6] = None
-    userBoundingBox: Optional[IntVector6] = None
+    userBoundingBoxes: Optional[List[IntVector6]] = None
 
 
 class Node(NamedTuple):
@@ -177,19 +177,30 @@ class NML(NamedTuple):
     volume: Optional[Volume] = None
 
 
-def __parse_bounding_box(nml_parameters, prefix):
-    boundingBox = None
-    bboxName = prefix + "BoundingBox"
-    if nml_parameters.find(bboxName) is not None:
-        boundingBox = (
-            int(nml_parameters.find(bboxName).get("topLeftX")),
-            int(nml_parameters.find(bboxName).get("topLeftY")),
-            int(nml_parameters.find(bboxName).get("topLeftZ")),
-            int(nml_parameters.find(bboxName).get("width")),
-            int(nml_parameters.find(bboxName).get("height")),
-            int(nml_parameters.find(bboxName).get("depth")),
-        )
-    return boundingBox
+def __parse_user_bounding_boxes(nml_parameters: Element):
+    # ToDo support color, id, name, isVisible attributes
+    # https://github.com/scalableminds/wknml/issues/46
+    bb_elements = nml_parameters.findall("userBoundingBox")
+    return [__parse_bounding_box(bb_element) for bb_element in bb_elements]
+
+
+def __parse_task_bounding_box(nml_parameters: Element):
+    bb_element = nml_parameters.find("taskBoundingBox")
+    if bb_element is not None:
+        return __parse_bounding_box(bb_element)
+
+    return None
+
+
+def __parse_bounding_box(bounding_box_element: Element):
+    return (
+        int(bounding_box_element.get("topLeftX")),
+        int(bounding_box_element.get("topLeftY")),
+        int(bounding_box_element.get("topLeftZ")),
+        int(bounding_box_element.get("width")),
+        int(bounding_box_element.get("height")),
+        int(bounding_box_element.get("depth")),
+    )
 
 
 def __parse_parameters(nml_parameters: Element):
@@ -225,8 +236,8 @@ def __parse_parameters(nml_parameters: Element):
     if nml_parameters.find("zoomLevel") is not None:
         zoomLevel = nml_parameters.find("zoomLevel").get("zoom")
 
-    taskBoundingBox = __parse_bounding_box(nml_parameters, "task")
-    userBoundingBox = __parse_bounding_box(nml_parameters, "user")
+    taskBoundingBox = __parse_task_bounding_box(nml_parameters)
+    userBoundingBoxes = __parse_user_bounding_boxes(nml_parameters)
 
     return NMLParameters(
         name=nml_parameters.find("experiment").get("name"),
@@ -241,7 +252,7 @@ def __parse_parameters(nml_parameters: Element):
         editRotation=editRotation,
         zoomLevel=zoomLevel,
         taskBoundingBox=taskBoundingBox,
-        userBoundingBox=userBoundingBox,
+        userBoundingBoxes=userBoundingBoxes,
     )
 
 
@@ -423,22 +434,32 @@ def parse_nml(file: BinaryIO) -> NML:
     )
 
 
-def __dump_bounding_box(xf: XmlWriter, parameters, prefix):
-    bboxName = prefix + "BoundingBox"
-    parametersBox = getattr(parameters, bboxName)
+def __dump_task_bounding_box(xf: XmlWriter, parameters: NMLParameters):
+    task_bounding_box = getattr(parameters, "taskBoundingBox")
+    if task_bounding_box is not None:
+        __dump_bounding_box(task_bounding_box, "taskBoundingBox")
 
-    if parametersBox is not None:
-        xf.tag(
-            bboxName,
-            {
-                "topLeftX": str(parametersBox[0]),
-                "topLeftY": str(parametersBox[1]),
-                "topLeftZ": str(parametersBox[2]),
-                "width": str(parametersBox[3]),
-                "height": str(parametersBox[4]),
-                "depth": str(parametersBox[5]),
-            },
-        )
+
+def __dump_user_bounding_boxes(xf: XmlWriter, parameters: NMLParameters):
+    user_bounding_boxes = getattr(parameters, "userBoundingBoxes")
+
+    if user_bounding_boxes is not None:
+        for user_bounding_box in user_bounding_boxes:
+            __dump_bounding_box(xf, user_bounding_box, "userBoundingBox")
+
+
+def __dump_bounding_box(xf: XmlWriter, bounding_box: IntVector6, tag_name: Text):
+    xf.tag(
+        tag_name,
+        {
+            "topLeftX": str(bounding_box[0]),
+            "topLeftY": str(bounding_box[1]),
+            "topLeftZ": str(bounding_box[2]),
+            "width": str(bounding_box[3]),
+            "height": str(bounding_box[4]),
+            "depth": str(bounding_box[5]),
+        },
+    )
 
 
 def __dump_parameters(xf: XmlWriter, parameters: NMLParameters):
@@ -486,8 +507,8 @@ def __dump_parameters(xf: XmlWriter, parameters: NMLParameters):
     if parameters.zoomLevel is not None:
         xf.tag("zoomLevel", {"zoom": str(parameters.zoomLevel)})
 
-    __dump_bounding_box(xf, parameters, "task")
-    __dump_bounding_box(xf, parameters, "user")
+    __dump_task_bounding_box(xf, parameters)
+    __dump_user_bounding_boxes(xf, parameters)
 
     xf.endTag()  # parameters
 

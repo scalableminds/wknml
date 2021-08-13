@@ -132,7 +132,7 @@ def generate_nml(
         editRotation=parameters.get("editRotation", None),
         zoomLevel=parameters.get("zoomLevel", None),
         taskBoundingBox=parameters.get("taskBoundingBox", None),
-        userBoundingBox=parameters.get("userBoundingBox", None),
+        userBoundingBoxes=parameters.get("userBoundingBoxes", None),
     )
 
     comments = [
@@ -231,7 +231,7 @@ def generate_graph(nml: NML) -> Tuple[Dict[str, List[nx.Graph]], Dict[Text, any]
         "editRotation",
         "zoomLevel",
         "taskBoundingBox",
-        "userBoundingBox",
+        "userBoundingBoxes",
     ]
 
     for parameter in parameter_list:

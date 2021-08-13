@@ -74,3 +74,18 @@ def test_pickle_serialization():
         new_nml = pickle.load(input_file)
 
     assert test_nml == new_nml
+
+
+def test_multiple_user_bounding_boxes():
+    with open("testdata/nml_with_multiple_user_bounding_boxes.nml", "r") as file:
+        test_nml = parse_nml(file)
+
+    assert len(test_nml.parameters.userBoundingBoxes) == 3
+
+    with open("testoutput/temp.nml", "wb") as file:
+        write_nml(file=file, nml=test_nml)
+
+    with open("testoutput/temp.nml", "r") as file:
+        test_result_nml = parse_nml(file)
+
+    assert len(test_nml.parameters.userBoundingBoxes) == 3

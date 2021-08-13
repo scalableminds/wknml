@@ -16,7 +16,7 @@ from networkx.classes.graph import Graph
 timestamp = 1607446137
 
 
-def test_build_new_nml_onject():
+def test_build_new_nml_object():
     """Create a new NML object from primitives. Test each constructor"""
 
     id_counter = count()
@@ -64,7 +64,7 @@ def test_build_new_nml_onject():
         editRotation=[1, 2, 3],
         zoomLevel=1,
         taskBoundingBox=[1, 2, 3, 1, 2, 3],
-        userBoundingBox=[1, 2, 3, 1, 2, 3],
+        userBoundingBoxes=[[1, 2, 3, 1, 2, 3]],
     )
 
     volume = Volume(
@@ -109,7 +109,7 @@ def test_optional_parameters():
     assert parameters.editRotation is None
     assert parameters.zoomLevel is None
     assert parameters.taskBoundingBox is None
-    assert parameters.userBoundingBox is None
+    assert parameters.userBoundingBoxes is None
 
     volume = Volume(
         id=next(id_counter),
