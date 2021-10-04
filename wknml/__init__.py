@@ -437,7 +437,7 @@ def parse_nml(file: BinaryIO) -> NML:
 def __dump_task_bounding_box(xf: XmlWriter, parameters: NMLParameters):
     task_bounding_box = getattr(parameters, "taskBoundingBox")
     if task_bounding_box is not None:
-        __dump_bounding_box(task_bounding_box, "taskBoundingBox")
+        __dump_bounding_box(xf, task_bounding_box, "taskBoundingBox")
 
 
 def __dump_user_bounding_boxes(xf: XmlWriter, parameters: NMLParameters):
@@ -605,13 +605,7 @@ def __dump_volume(xf: XmlWriter, volume: Volume):
                 },
             )
         else:
-            xf.tag(
-                "volume",
-                {
-                    "id": str(volume.id),
-                    "location": volume.location,
-                },
-            )
+            xf.tag("volume", {"id": str(volume.id), "location": volume.location})
 
 
 def __dump_group(xf: XmlWriter, group: Group):
