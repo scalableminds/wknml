@@ -1,3 +1,5 @@
+# Note: This package is deprecated in favor of the Skeleton module within [wk-libs](https://github.com/scalableminds/webknossos-libs/tree/master/webknossos) ([docs](https://docs.webknossos.org/api/webknossos/skeleton/skeleton.html)).
+
 # wknml
 [![PyPI version](https://img.shields.io/pypi/v/wknml)](https://pypi.python.org/pypi/wknml)
 [![Supported Python Versions](https://img.shields.io/pypi/pyversions/wknml.svg)](https://pypi.python.org/pypi/wknml)
